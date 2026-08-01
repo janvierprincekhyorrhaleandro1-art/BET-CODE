@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — BetCode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;
+    --bg-elevated:#0D0D0D;
+    --bg-card:#131313;
+    --gold:#E8B34C;
+    --gold-bright:#F4C766;
+    --gold-dim:#B8862F;
+    --text:#FFFFFF;
+    --text-muted:rgba(255,255,255,0.55);
+    --border:rgba(255,255,255,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
+
+  /* Nav */
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 0;border-bottom:1px solid var(--border);
+  }
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.03em;display:flex;align-items:center;gap:8px;}
+  .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
+  .user-chip{display:flex;align-items:center;gap:10px;}
+  .avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  }
+  .plan-badge{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;background:rgba(232,179,76,0.12);
+    color:var(--gold);border:1px solid rgba(232,179,76,0.3);padding:3px 8px;border-radius:5px;letter-spacing:0.05em;
+  }
+  .logout{font-size:13px;color:var(--text-muted);margin-left:6px;}
+
+  /* Stats — slim rectangle strip */
+  .stats{
+    display:flex;
+    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;
+    margin:20px 0;
+  }
+  .stat{flex:1;padding:10px 16px;display:flex;align-items:center;gap:8px;}
+  .stat:not(:last-child){border-right:1px solid var(--border);}
+  .stat .label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text-muted);letter-spacing:0.03em;}
+  .stat .val{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
+  .stat .val.gold{color:var(--gold);}
+  @media(max-width:600px){.stats{flex-direction:column;} .stat:not(:last-child){border-right:none;border-bottom:1px solid var(--border);}}
+
+  /* Filters — two stacked rows */
+  .filter-block{margin-bottom:20px;}
+  .filter-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:0.05em;margin-bottom:8px;}
+  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+  .filters::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+    font-size:13px;color:var(--text-muted);white-space:nowrap;cursor:pointer;
+  }
+  .chip.active{background:var(--gold);border-color:var(--gold);color:#0A0A0A;font-weight:600;}
+
+  /* Tips list */
+  .tips-list{display:flex;flex-direction:column;gap:12px;padding-bottom:60px;}
+  .tip-row{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+    padding:18px 20px;position:relative;overflow:hidden;
+  }
+  .tip-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .tip-league{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .tip-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .tip-match{font-size:15.5px;font-weight:600;margin-bottom:14px;}
+  .tip-bottom{display:flex;justify-content:space-between;align-items:center;gap:16px;}
+  .tip-pick{font-size:13.5px;color:var(--text-muted);}
+  .tip-pick b{color:var(--gold);font-weight:600;}
+  .conf-wrap{display:flex;align-items:center;gap:8px;min-width:96px;}
+  .conf-bar{flex:1;height:5px;background:var(--bg-elevated);border-radius:3px;overflow:hidden;}
+  .conf-bar span{display:block;height:100%;background:var(--gold);border-radius:3px;}
+  .conf-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);}
+
+  .tip-row.locked .tip-match,.tip-row.locked .tip-bottom{filter:blur(5px);user-select:none;}
+  .lock-tag{
+    position:absolute;top:16px;right:18px;font-family:'JetBrains Mono',monospace;font-size:10px;
+    background:rgba(232,179,76,0.12);color:var(--gold);border:1px solid rgba(232,179,76,0.3);
+    padding:3px 8px;border-radius:5px;z-index:2;
+  }
+  .lock-overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
+    background:rgba(0,0,0,0.55);font-size:13px;color:var(--text-muted);z-index:1;
+  }
+  .lock-overlay a{color:var(--gold);font-weight:600;}
+
+  .load-more{
+    display:block;width:100%;padding:13px 0;background:var(--bg-elevated);border:1px solid var(--border);
+    border-radius:8px;color:var(--text-muted);font-size:14px;text-align:center;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <div class="user-chip">
+        <span class="plan-badge">PLAN PRO</span>
+        <div class="avatar">JD</div>
+        <span class="logout">Dekonekte</span>
+      </div>
+    </nav>
+
+    <div class="stats">
+      <div class="stat"><span class="label">MATCH JODIA</span><span class="val">47</span></div>
+      <div class="stat"><span class="label">PRESIZYON 30J</span><span class="val gold">68%</span></div>
+      <div class="stat"><span class="label">TIPS JODIA</span><span class="val">12</span></div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-label">// KONPETISYON</div>
+      <div class="filters">
+        <div class="chip active">Tout</div>
+        <div class="chip">Ligue 1</div>
+        <div class="chip">Liga</div>
+        <div class="chip">Lig dè Chanpyon</div>
+        <div class="chip">Serie A</div>
+        <div class="chip">Premier League</div>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-label">// DAT</div>
+      <div class="filters">
+        <div class="chip active">Jodia</div>
+        <div class="chip">Demen</div>
+        <div class="chip">Apre Demen</div>
+        <div class="chip">Nan 3 Jou</div>
+        <div class="chip">Nan 4 Jou</div>
+        <div class="chip">Nan 5 Jou</div>
+      </div>
+    </div>
+
+    <div class="tips-list">
+
+      <div class="tip-row">
+        <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">15:00</span></div>
+        <div class="tip-match">Olympique Cité — AS Portuaire</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">Total Gòl — <b>Plis 2.5</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:82%"></span></div><span class="conf-pct">82%</span></div>
+        </div>
+      </div>
+
+      <div class="tip-row">
+        <div class="tip-top"><span class="tip-league mono">SERIE A • JOUNEN 19</span><span class="tip-time mono">18:00</span></div>
+        <div class="tip-match">Milano United — Vitesse Roma</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">Rezilta Double Chans — <b>1X</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:74%"></span></div><span class="conf-pct">74%</span></div>
+        </div>
+      </div>
+
+      <div class="tip-row">
+        <div class="lock-tag mono">VIP</div>
+        <div class="tip-top"><span class="tip-league mono">LIGA • JOUNEN 21</span><span class="tip-time mono">20:30</span></div>
+        <div class="tip-match">Deportivo Sur — Real Norte</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">Total Gòl — <b>Plis 3.5</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:91%"></span></div><span class="conf-pct">91%</span></div>
+        </div>
+        <div class="lock-overlay">🔒 <a href="#">Vin VIP pou dekloke</a></div>
+      </div>
+
+      <div class="tip-row">
+        <div class="tip-top"><span class="tip-league mono">PREMIER LEAGUE • JOUNEN 20</span><span class="tip-time mono">17:30</span></div>
+        <div class="tip-match">Nordik City — Sport Baie</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">Toude Ekip Make — <b>Wi</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:79%"></span></div><span class="conf-pct">79%</span></div>
+        </div>
+      </div>
+
+      <div class="tip-row">
+        <div class="tip-top"><span class="tip-league mono">LIG DÈ CHANPYON • JOUNEN 5</span><span class="tip-time mono">16:00</span></div>
+        <div class="tip-match">Nord Athletic — Étoile Bleue</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">Total Kòne — <b>Plis 9.5</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:70%"></span></div><span class="conf-pct">70%</span></div>
+        </div>
+      </div>
+
+      <div class="tip-row">
+        <div class="lock-tag mono">VIP</div>
+        <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">21:00</span></div>
+        <div class="tip-match">Racing FC — Atlas SC</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">Miltip 3 Match — <b>Gwo Kòt</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:85%"></span></div><span class="conf-pct">85%</span></div>
+        </div>
+        <div class="lock-overlay">🔒 <a href="#">Vin VIP pou dekloke</a></div>
+      </div>
+
+    </div>
+
+    <div class="load-more">Chaje Rès Match Jounen an</div>
+  </div>
+</body>
+</html>

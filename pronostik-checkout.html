@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peman — BetCode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
+    --gold:#E8B34C; --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:480px;margin:0 auto;padding:0 20px 60px;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border);margin-bottom:28px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;display:flex;align-items:center;gap:8px;}
+  .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
+  .back{font-size:13px;color:var(--text-muted);}
+
+  h1.title{font-size:26px;margin-bottom:6px;}
+  .subtitle{font-size:13.5px;color:var(--text-muted);margin-bottom:22px;}
+
+  .section-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);letter-spacing:0.06em;margin-bottom:12px;}
+
+  /* Plan selector — side by side */
+  .plan-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+  .plan-opt{
+    background:var(--bg-card);border:1.5px solid var(--border);border-radius:12px;padding:16px;
+    cursor:pointer;text-align:left;position:relative;
+  }
+  .plan-opt.selected{border-color:var(--gold);background:rgba(232,179,76,0.06);}
+  .plan-opt .p-name{font-family:'Bebas Neue',sans-serif;font-size:19px;margin-bottom:4px;}
+  .plan-opt .p-price{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-muted);}
+  .plan-opt.selected .p-price{color:var(--gold);}
+  .check-dot{
+    position:absolute;top:12px;right:12px;width:16px;height:16px;border-radius:50%;
+    border:1.5px solid var(--border);
+  }
+  .plan-opt.selected .check-dot{background:var(--gold);border-color:var(--gold);}
+
+  /* Order summary */
+  .summary{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:22px;}
+  .summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .summary-row:last-child{margin-bottom:0;padding-top:12px;border-top:1px solid var(--border);}
+  .summary-row .val{font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .summary-row .total-val{font-family:'JetBrains Mono',monospace;font-size:19px;color:var(--gold);font-weight:700;}
+  .summary-row .lbl-total{font-weight:600;}
+
+  /* Payment method switch */
+  .method-switch{
+    display:flex;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:16px;
+  }
+  .method-opt{
+    flex:1;text-align:center;padding:10px 0;border-radius:7px;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .method-opt.selected{background:var(--gold);color:#0A0A0A;}
+  .method-logo{width:20px;height:20px;border-radius:5px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--text-muted);}
+  .method-opt.selected .method-logo{background:#0A0A0A;color:var(--gold);}
+
+  /* MonCash/NatCash instructions box */
+  .pay-box{
+    background:var(--bg-card);border:1px solid var(--gold);border-radius:12px;padding:20px 22px;margin-bottom:20px;
+  }
+  .pay-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .pay-logo{
+    width:34px;height:34px;border-radius:8px;background:var(--gold);color:#0A0A0A;
+    display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0;
+  }
+  .pay-head b{font-size:15px;}
+  .pay-head .sub{font-size:12px;color:var(--text-muted);}
+  .pay-step{display:flex;gap:12px;margin-bottom:14px;}
+  .pay-step:last-child{margin-bottom:0;}
+  .step-num{
+    width:22px;height:22px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);flex-shrink:0;
+  }
+  .step-text{font-size:13.5px;color:var(--text-muted);padding-top:2px;}
+  .step-text b{color:var(--text);}
+  .phone-box{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .phone-box .num{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--gold);letter-spacing:0.02em;}
+  .phone-box .copy{font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;}
+
+  /* Confirmation form */
+  .card-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.03em;}
+  .field input{
+    width:100%;padding:12px 14px;background:var(--bg-elevated);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-size:14.5px;font-family:'Inter',sans-serif;
+  }
+  .field input:focus{outline:none;border-color:var(--gold);}
+  .field input::placeholder{color:#4A4A4A;}
+
+  .upload-zone{
+    border:1.5px dashed var(--border);border-radius:10px;padding:26px 16px;text-align:center;
+    background:var(--bg-elevated);cursor:pointer;
+  }
+  .upload-zone .icon{font-size:22px;margin-bottom:8px;}
+  .upload-zone .main-txt{font-size:13.5px;margin-bottom:4px;}
+  .upload-zone .sub-txt{font-size:11.5px;color:var(--text-muted);}
+  .upload-zone input[type="file"]{display:none;}
+
+  .btn-pay{
+    width:100%;padding:15px 0;background:var(--gold);color:#0A0A0A;border:none;
+    border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:14px;
+  }
+  .btn-pay:hover{background:#F4C766;}
+
+  .verify-note{
+    display:flex;align-items:flex-start;gap:8px;
+    font-size:12px;color:var(--text-muted);margin-bottom:24px;line-height:1.6;
+  }
+
+  .fine{text-align:center;font-size:11.5px;color:var(--text-muted);line-height:1.6;}
+  .fine a{color:var(--gold);}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <a class="back" href="#">← Retounen</a>
+    </nav>
+
+    <h1 class="title">Konfime Abònman</h1>
+    <div class="subtitle">Chwazi plan ou, peye ak MonCash oswa NatCash, epi voye prèv peman an.</div>
+
+    <div class="section-title">// CHWAZI PLAN</div>
+    <div class="plan-select">
+      <div class="plan-opt selected" id="planPro" onclick="selectPlan('pro')">
+        <div class="check-dot"></div>
+        <div class="p-name">Pro</div>
+        <div class="p-price">500G/mwa</div>
+      </div>
+      <div class="plan-opt" id="planVip" onclick="selectPlan('vip')">
+        <div class="check-dot"></div>
+        <div class="p-name">VIP</div>
+        <div class="p-price">1000G/3 mwa</div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="summary-row">
+        <span style="font-size:13px;color:var(--text-muted);">Plan chwazi</span>
+        <span class="val" id="sumPlan">Pro</span>
+      </div>
+      <div class="summary-row">
+        <span style="font-size:13px;color:var(--text-muted);">Sik faktirasyon</span>
+        <span class="val" id="sumCycle" style="color:var(--text-muted);">Chak mwa</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl-total">Total pou Voye</span>
+        <span class="total-val" id="sumTotal">500G</span>
+      </div>
+    </div>
+
+    <div class="section-title">// METÒD PEMAN</div>
+    <div class="method-switch">
+      <div class="method-opt selected" id="methMoncash" onclick="selectMethod('moncash')">
+        <span class="method-logo">MC</span>MonCash
+      </div>
+      <div class="method-opt" id="methNatcash" onclick="selectMethod('natcash')">
+        <span class="method-logo">NC</span>NatCash
+      </div>
+    </div>
+
+    <div class="pay-box">
+      <div class="pay-head">
+        <div class="pay-logo" id="payLogo">MC</div>
+        <div>
+          <b id="payName">Peman MonCash</b><br>
+          <span class="sub">Transfè manyèl — verifye anba 24è</span>
+        </div>
+      </div>
+
+      <div class="pay-step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <b>Voye <span id="stepAmount">500G</span></b> nan nimewo <span id="stepMethodName">MonCash</span> sa a:
+          <div class="phone-box">
+            <span class="num" id="phoneNum">+509 3106-6407</span>
+            <span class="copy">KOPYE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pay-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Pran yon <b>screenshot</b> konfirmasyon an</div>
+      </div>
+
+      <div class="pay-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Ranpli fòm anba a epi voye prèv la</div>
+      </div>
+    </div>
+
+    <div class="section-title">// KONFIRME PEMAN OU</div>
+    <div class="card-box">
+      <div class="field">
+        <label>NON KONPLÈ</label>
+        <input type="text" placeholder="Non ak siyati w">
+      </div>
+      <div class="field">
+        <label>ID KONT / NIMEWO TRANZAKSYON</label>
+        <input type="text" placeholder="ID kont oswa referans tranzaksyon an">
+      </div>
+      <div class="field">
+        <label>SCREENSHOT PEMAN AN</label>
+        <div class="upload-zone">
+          <input type="file" id="proofUpload" accept="image/*">
+          <div class="icon">📎</div>
+          <div class="main-txt">Klike pou telechaje screenshot la</div>
+          <div class="sub-txt">PNG oswa JPG</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-pay">Voye Prèv Peman</div>
+    <div class="verify-note">⏱ Ekip nou an ap verifye peman an manyèlman epi aktive abònman ou nan mwens pase 24è.</div>
+
+    <div class="fine">
+      Yon fwa konfime, ou ka jere abònman ou nan paj Kont Mwen an.<br>
+      Lè w voye, ou aksepte <a href="#">Kondisyon Sèvis</a> nou yo.
+    </div>
+  </div>
+
+<script>
+  const plans = {
+    pro: {name:'Pro', price:'500G', cycle:'Chak mwa'},
+    vip: {name:'VIP', price:'1000G', cycle:'Chak 3 mwa'}
+  };
+  const methods = {
+    moncash: {name:'MonCash', logo:'MC', phone:'+509 3106-6407'},
+    natcash: {name:'NatCash', logo:'NC', phone:'+509 4390-0051'}
+  };
+
+  function selectPlan(key){
+    document.getElementById('planPro').classList.toggle('selected', key==='pro');
+    document.getElementById('planVip').classList.toggle('selected', key==='vip');
+    const p = plans[key];
+    document.getElementById('sumPlan').textContent = p.name;
+    document.getElementById('sumCycle').textContent = p.cycle;
+    document.getElementById('sumTotal').textContent = p.price;
+    document.getElementById('stepAmount').textContent = p.price;
+  }
+
+  function selectMethod(key){
+    document.getElementById('methMoncash').classList.toggle('selected', key==='moncash');
+    document.getElementById('methNatcash').classList.toggle('selected', key==='natcash');
+    const m = methods[key];
+    document.getElementById('payLogo').textContent = m.logo;
+    document.getElementById('payName').textContent = 'Peman ' + m.name;
+    document.getElementById('stepMethodName').textContent = m.name;
+    document.getElementById('phoneNum').textContent = m.phone;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kont Mwen — BetCode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
+    --gold:#E8B34C; --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
+    --red:#E8574C;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px 60px;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border);margin-bottom:24px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;display:flex;align-items:center;gap:8px;}
+  .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
+  .nav-right{display:flex;align-items:center;gap:16px;}
+  .back{font-size:13px;color:var(--text-muted);}
+  .logout-link{font-size:13px;color:var(--text-muted);cursor:pointer;}
+  .logout-link:hover{color:var(--red);}
+
+  .loading-state{text-align:center;padding:60px 0;color:var(--text-muted);font-size:14px;}
+
+  .profile-head{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+  .avatar-big{
+    width:64px;height:64px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;
+  }
+  .profile-head h1{font-size:24px;margin-bottom:4px;}
+  .profile-head .email{font-size:13px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;}
+  .id-badge{
+    display:inline-block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--gold);background:rgba(232,179,76,0.1);border:1px solid rgba(232,179,76,0.25);
+    padding:2px 8px;border-radius:5px;letter-spacing:0.03em;
+  }
+
+  .section-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);letter-spacing:0.06em;margin:0 0 12px;}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:28px;}
+
+  .plan-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .plan-name{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+  .plan-name .tag{color:var(--gold);}
+  .plan-price{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-muted);}
+  .plan-features{list-style:none;margin-bottom:16px;}
+  .plan-features li{font-size:13.5px;color:var(--text-muted);padding:6px 0;border-top:1px solid var(--border);}
+  .plan-features li:first-child{border-top:none;}
+  .btn-row{display:flex;gap:10px;}
+  .btn{flex:1;padding:11px 0;border-radius:8px;font-size:13.5px;font-weight:600;text-align:center;cursor:pointer;border:none;}
+  .btn-primary{background:var(--gold);color:#0A0A0A;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.03em;}
+  .field input{
+    width:100%;padding:12px 14px;background:var(--bg-elevated);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-size:14.5px;font-family:'Inter',sans-serif;
+  }
+  .field input:focus{outline:none;border-color:var(--gold);}
+
+  .save-status{font-size:12px;color:var(--win, #4CAF7D);margin-top:8px;display:none;}
+  .save-status.show{display:block;}
+
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--border);}
+  .toggle-row:first-child{border-top:none;}
+  .toggle-row .t-label{font-size:14px;}
+  .toggle-row .t-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .switch{width:40px;height:22px;border-radius:12px;background:var(--bg-elevated);border:1px solid var(--border);position:relative;cursor:pointer;flex-shrink:0;}
+  .switch.on{background:var(--gold);border-color:var(--gold);}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--text);transition:transform .15s;}
+  .switch.on::after{transform:translateX(18px);background:#0A0A0A;}
+
+  .danger-link{font-size:12.5px;color:var(--text-muted);text-align:center;margin-top:8px;cursor:pointer;}
+  .danger-link:hover{color:var(--red);}
+  .confirm-box{
+    display:none;background:var(--bg-card);border:1px solid rgba(232,87,76,0.35);border-radius:12px;
+    padding:18px 20px;margin-top:10px;
+  }
+  .confirm-box.show{display:block;}
+  .confirm-box .warn-title{font-size:13.5px;font-weight:600;color:var(--red);margin-bottom:6px;}
+  .confirm-box .warn-text{font-size:12.5px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;}
+  .confirm-actions{display:flex;gap:10px;}
+  .btn-danger-confirm{flex:1;padding:10px 0;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--red);color:#1A0605;}
+  .btn-cancel{flex:1;padding:10px 0;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);}
+
+  #pageContent{display:none;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <div class="nav-right">
+        <a class="back" href="pronostik-dashboard.html">← Retounen</a>
+        <span class="logout-link" onclick="handleLogout()">Dekonekte</span>
+      </div>
+    </nav>
+
+    <div class="loading-state" id="loadingState">Chajman kont ou...</div>
+
+    <div id="pageContent">
+      <div class="profile-head">
+        <div class="avatar-big" id="avatarInitials">--</div>
+        <div>
+          <h1 id="profileName">—</h1>
+          <div class="email" id="profileEmail">—</div>
+          <div class="id-badge">ID KONT: <span id="profileAccountId">-----</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">// ABÒNMAN</div>
+      <div class="card">
+        <div class="plan-row">
+          <div class="plan-name">Plan <span class="tag" id="planTag">Gratis</span></div>
+          <div class="plan-price" id="planPrice">0G/mwa</div>
+        </div>
+        <ul class="plan-features">
+          <li>5 tips gratis chak jou</li>
+          <li>3 sou konpetisyon popilè, 2 sou lòt</li>
+        </ul>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="pronostik-checkout.html">Vin Pro/VIP</a>
+          <a class="btn btn-ghost" href="pronostik-checkout.html">Jere Peman</a>
+        </div>
+      </div>
+
+      <div class="section-title">// PWOFIL</div>
+      <div class="card">
+        <div class="field"><label>NON</label><input type="text" id="nameInput"></div>
+        <div class="field"><label>IMEL</label><input type="email" id="emailInputField" disabled></div>
+        <div class="btn btn-primary" style="max-width:180px;" onclick="saveProfile()">Sove Chanjman</div>
+        <div class="save-status" id="saveStatus">✓ Chanjman sove</div>
+      </div>
+
+      <div class="section-title">// NOTIFIKASYON</div>
+      <div class="card">
+        <div class="toggle-row">
+          <div><div class="t-label">Nouvo tips chak jou</div><div class="t-desc">Resevwa yon notifikasyon lè nou pibliye tips jounen an</div></div>
+          <div class="switch on"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="t-label">Tips gwo konfyans (90%+)</div><div class="t-desc">Alèt imedya pou tips ki gen pi wo nivo konfyans</div></div>
+          <div class="switch on"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="t-label">Imel maketing</div><div class="t-desc">Ofrann ak nouvèl sou sèvis la</div></div>
+          <div class="switch"></div>
+        </div>
+      </div>
+
+      <div class="danger-link" onclick="document.getElementById('confirmBox').classList.toggle('show')">Jesyon kont avanse</div>
+      <div class="confirm-box" id="confirmBox">
+        <div class="warn-title">⚠ Efase Kont</div>
+        <div class="warn-text">Sa ap efase tout done ou yo pou tout tan, san posiblite pou retabli yo. Aksyon sa a pa ka anile.</div>
+        <div class="confirm-actions">
+          <div class="btn-cancel" onclick="document.getElementById('confirmBox').classList.remove('show')">Anile</div>
+          <div class="btn-danger-confirm">Wi, Efase Kont Mwen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = 'https://ennivlexjektcwfshozl.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_jQWO3I8vDsUJshVYrWbRLg_Zn3Zafjz';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentUserId = null;
+
+  function initials(name){
+    if(!name) return '--';
+    const parts = name.trim().split(' ').filter(Boolean);
+    return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+  }
+
+  async function loadProfile(){
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){
+      window.location.href = 'pronostik-auth.html';
+      return;
+    }
+    currentUserId = session.user.id;
+
+    const { data: profile, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUserId)
+      .single();
+
+    if(error || !profile){
+      document.getElementById('loadingState').textContent = 'Nou pa rive chaje pwofil ou. Eseye rafrechi paj la.';
+      return;
+    }
+
+    document.getElementById('profileName').textContent = profile.full_name || 'Itilizatè';
+    document.getElementById('profileEmail').textContent = session.user.email;
+    document.getElementById('profileAccountId').textContent = profile.account_id || '-----';
+    document.getElementById('avatarInitials').textContent = initials(profile.full_name);
+    document.getElementById('nameInput').value = profile.full_name || '';
+    document.getElementById('emailInputField').value = session.user.email;
+
+    const plan = profile.plan || 'gratis';
+    const planLabels = { gratis:'Gratis', pro:'Pro', vip:'VIP' };
+    const planPrices = { gratis:'0G/mwa', pro:'500G/mwa', vip:'1000G/3 mwa' };
+    document.getElementById('planTag').textContent = planLabels[plan] || 'Gratis';
+    document.getElementById('planPrice').textContent = planPrices[plan] || '0G/mwa';
+
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('pageContent').style.display = 'block';
+  }
+
+  async function saveProfile(){
+    const newName = document.getElementById('nameInput').value.trim();
+    const { error } = await sb
+      .from('profiles')
+      .update({ full_name: newName })
+      .eq('id', currentUserId);
+
+    const statusEl = document.getElementById('saveStatus');
+    if(!error){
+      document.getElementById('profileName').textContent = newName;
+      document.getElementById('avatarInitials').textContent = initials(newName);
+      statusEl.textContent = '✓ Chanjman sove';
+      statusEl.style.color = '#4CAF7D';
+    } else {
+      statusEl.textContent = '✗ Erè: pa t ka sove chanjman an';
+      statusEl.style.color = '#E8574C';
+    }
+    statusEl.classList.add('show');
+    setTimeout(() => statusEl.classList.remove('show'), 3000);
+  }
+
+  async function handleLogout(){
+    await sb.auth.signOut();
+    window.location.href = 'pronostik-auth.html';
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>

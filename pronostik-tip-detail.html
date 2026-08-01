@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analiz Match — BetCode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
+    --gold:#E8B34C; --gold-bright:#F4C766;
+    --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px 60px;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border);margin-bottom:24px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;display:flex;align-items:center;gap:8px;}
+  .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
+  .back{font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+
+  /* Match header */
+  .match-header{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+    padding:26px;margin-bottom:20px;
+  }
+  .league-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);margin-bottom:20px;}
+  .teams{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:24px;}
+  .team{text-align:center;flex:1;}
+  .team .badge{
+    width:56px;height:56px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:'Bebas Neue',sans-serif;font-size:18px;
+  }
+  .team .name{font-size:13.5px;font-weight:500;}
+  .vs{font-family:'JetBrains Mono',monospace;color:var(--text-muted);font-size:13px;}
+
+  .verdict{
+    background:var(--bg-elevated);border-radius:10px;padding:20px;
+    display:flex;align-items:center;gap:20px;
+  }
+  .gauge{position:relative;width:84px;height:84px;flex-shrink:0;}
+  .gauge svg{transform:rotate(-90deg);}
+  .gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;color:var(--gold);}
+  .verdict-text .label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:4px;}
+  .verdict-text .pick{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:0.01em;}
+
+  /* Market predictions */
+  .section-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);letter-spacing:0.06em;margin:28px 0 14px;}
+  .market-row{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+    padding:14px 18px;margin-bottom:8px;
+  }
+  .market-name{font-size:14px;font-weight:600;margin-bottom:6px;}
+  .market-pick{font-size:12.5px;color:var(--gold);}
+  .market-conf{display:flex;align-items:center;gap:8px;min-width:110px;flex-shrink:0;}
+  .market-bar{flex:1;height:5px;background:var(--bg-elevated);border-radius:3px;overflow:hidden;}
+  .market-bar span{display:block;height:100%;background:var(--gold);border-radius:3px;}
+  .market-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);}
+
+  .disclaimer{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;font-size:12px;color:var(--text-muted);margin-top:28px;line-height:1.6;
+  }
+  .disclaimer b{color:var(--text);}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <a class="back" href="#">← Retounen nan Dashboard</a>
+    </nav>
+
+    <div class="match-header">
+      <div class="league-row"><span>LIGUE 1 • JOUNEN 22</span><span class="mono">Dimanch 15:00</span></div>
+      <div class="teams">
+        <div class="team"><div class="badge">OC</div><div class="name">Olympique Cité</div></div>
+        <div class="vs">VS</div>
+        <div class="team"><div class="badge">ASP</div><div class="name">AS Portuaire</div></div>
+      </div>
+      <div class="verdict">
+        <div class="gauge">
+          <svg width="84" height="84">
+            <circle cx="42" cy="42" r="36" stroke="#262626" stroke-width="7" fill="none"/>
+            <circle cx="42" cy="42" r="36" stroke="#E8B34C" stroke-width="7" fill="none"
+              stroke-dasharray="226" stroke-dashoffset="41" stroke-linecap="round"/>
+          </svg>
+          <div class="gauge-val">82%</div>
+        </div>
+        <div class="verdict-text">
+          <div class="label">TIP PRENSIPAL</div>
+          <div class="pick">Total Gòl — Plis 2.5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">// TOUT TIPS POU MATCH SA A</div>
+
+    <div class="market-row">
+      <div>
+        <div class="market-name">Total Gòl</div>
+        <div class="market-pick">Plis 2.5</div>
+      </div>
+      <div class="market-conf"><div class="market-bar"><span style="width:82%"></span></div><span class="market-pct">82%</span></div>
+    </div>
+
+    <div class="market-row">
+      <div>
+        <div class="market-name">Rezilta Final</div>
+        <div class="market-pick">Double Chans 1X</div>
+      </div>
+      <div class="market-conf"><div class="market-bar"><span style="width:68%"></span></div><span class="market-pct">68%</span></div>
+    </div>
+
+    <div class="market-row">
+      <div>
+        <div class="market-name">Toude Ekip Make (BTTS)</div>
+        <div class="market-pick">Wi</div>
+      </div>
+      <div class="market-conf"><div class="market-bar"><span style="width:79%"></span></div><span class="market-pct">79%</span></div>
+    </div>
+
+    <div class="market-row">
+      <div>
+        <div class="market-name">Total Kat Jòn</div>
+        <div class="market-pick">Plis 4.5</div>
+      </div>
+      <div class="market-conf"><div class="market-bar"><span style="width:71%"></span></div><span class="market-pct">71%</span></div>
+    </div>
+
+    <div class="market-row">
+      <div>
+        <div class="market-name">Total Kòne</div>
+        <div class="market-pick">Plis 9.5</div>
+      </div>
+      <div class="market-conf"><div class="market-bar"><span style="width:76%"></span></div><span class="market-pct">76%</span></div>
+    </div>
+
+    <div class="disclaimer">
+      <b>⚠ Sonje:</b> Analiz sa a baze sou done ak estatistik — li pa yon garanti. Jwe ak responsablite, epi pa janm mize plis pase sa w ka pèdi.
+    </div>
+  </div>
+</body>
+</html>
