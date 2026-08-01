@@ -9,49 +9,39 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --bg:#000000;
-    --bg-elevated:#0D0D0D;
-    --bg-card:#131313;
-    --gold:#E8B34C;
-    --gold-bright:#F4C766;
-    --gold-dim:#B8862F;
-    --text:#FFFFFF;
-    --text-muted:rgba(255,255,255,0.55);
-    --border:rgba(255,255,255,0.08);
+    --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
+    --gold:#E8B34C; --gold-bright:#F4C766; --gold-dim:#B8862F;
+    --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{
-    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
-    line-height:1.5; -webkit-font-smoothing:antialiased;
-  }
+  body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased;}
   h1,h2,h3,.display{font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
   .mono{font-family:'JetBrains Mono',monospace;}
   a{color:inherit;text-decoration:none;}
   .wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
 
-  nav{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:18px 0;border-bottom:1px solid var(--border);
-  }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border);}
   .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.03em;display:flex;align-items:center;gap:8px;}
   .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
-  .user-chip{display:flex;align-items:center;gap:10px;cursor:pointer;}
-  .avatar{
-    width:34px;height:34px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
-  }
+  .nav-right{display:flex;align-items:center;gap:10px;}
   .plan-badge{
     font-family:'JetBrains Mono',monospace;font-size:10.5px;background:rgba(232,179,76,0.12);
     color:var(--gold);border:1px solid rgba(232,179,76,0.3);padding:3px 8px;border-radius:5px;letter-spacing:0.05em;
   }
-  .logout{font-size:13px;color:var(--text-muted);margin-left:6px;cursor:pointer;}
-  .logout:hover{color:var(--red,#E8574C);}
-
-  .stats{
-    display:flex;
-    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;
-    margin:20px 0;
+  .avatar-link{cursor:pointer;}
+  .avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
   }
+  .avatar-link:hover .avatar{border-color:var(--gold);}
+  .lang-toggle{
+    width:34px;height:34px;border-radius:8px;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;
+    font-weight:700;color:var(--text-muted);cursor:pointer;
+  }
+  .lang-toggle:hover{border-color:var(--gold);color:var(--gold);}
+
+  .stats{display:flex;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:20px 0;}
   .stat{flex:1;padding:10px 16px;display:flex;align-items:center;gap:8px;}
   .stat:not(:last-child){border-right:1px solid var(--border);}
   .stat .label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text-muted);letter-spacing:0.03em;}
@@ -63,18 +53,11 @@
   .filter-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:0.05em;margin-bottom:8px;}
   .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
   .filters::-webkit-scrollbar{display:none;}
-  .chip{
-    flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);
-    font-size:13px;color:var(--text-muted);white-space:nowrap;cursor:pointer;
-  }
+  .chip{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);font-size:13px;color:var(--text-muted);white-space:nowrap;cursor:pointer;}
   .chip.active{background:var(--gold);border-color:var(--gold);color:#0A0A0A;font-weight:600;}
 
   .tips-list{display:flex;flex-direction:column;gap:12px;padding-bottom:60px;}
-  .tip-row{
-    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
-    padding:18px 20px;position:relative;overflow:hidden;cursor:pointer;
-    transition:border-color .15s;
-  }
+  .tip-row{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .15s;}
   .tip-row:hover{border-color:var(--gold);}
   .tip-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
   .tip-league{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);}
@@ -90,21 +73,11 @@
 
   .tip-row.locked .tip-match,.tip-row.locked .tip-bottom{filter:blur(5px);user-select:none;}
   .tip-row.locked{cursor:default;}
-  .lock-tag{
-    position:absolute;top:16px;right:18px;font-family:'JetBrains Mono',monospace;font-size:10px;
-    background:rgba(232,179,76,0.12);color:var(--gold);border:1px solid rgba(232,179,76,0.3);
-    padding:3px 8px;border-radius:5px;z-index:2;
-  }
-  .lock-overlay{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
-    background:rgba(0,0,0,0.55);font-size:13px;color:var(--text-muted);z-index:1;
-  }
+  .lock-tag{position:absolute;top:16px;right:18px;font-family:'JetBrains Mono',monospace;font-size:10px;background:rgba(232,179,76,0.12);color:var(--gold);border:1px solid rgba(232,179,76,0.3);padding:3px 8px;border-radius:5px;z-index:2;}
+  .lock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(0,0,0,0.55);font-size:13px;color:var(--text-muted);z-index:1;}
   .lock-overlay a{color:var(--gold);font-weight:600;cursor:pointer;}
 
-  .load-more{
-    display:block;width:100%;padding:13px 0;background:var(--bg-elevated);border:1px solid var(--border);
-    border-radius:8px;color:var(--text-muted);font-size:14px;text-align:center;cursor:pointer;
-  }
+  .load-more{display:block;width:100%;padding:13px 0;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:14px;text-align:center;cursor:pointer;}
   .load-more:hover{border-color:var(--gold);color:var(--text);}
 </style>
 </head>
@@ -112,40 +85,40 @@
   <div class="wrap">
     <nav>
       <a class="logo" href="index.html"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></a>
-      <div class="user-chip" onclick="window.location.href='pronostik-account.html'">
+      <div class="nav-right">
         <span class="plan-badge" id="planBadge">PLAN GRATIS</span>
-        <div class="avatar" id="avatarInitials">--</div>
-        <span class="logout" onclick="event.stopPropagation(); handleLogout();">Dekonekte</span>
+        <a class="avatar-link" href="pronostik-account.html"><div class="avatar" id="avatarInitials">--</div></a>
+        <div class="lang-toggle" id="langToggle" onclick="toggleLang()">HT</div>
       </div>
     </nav>
 
     <div class="stats">
-      <div class="stat"><span class="label">MATCH JODIA</span><span class="val">47</span></div>
-      <div class="stat"><span class="label">PRESIZYON 30J</span><span class="val gold">68%</span></div>
-      <div class="stat"><span class="label">TIPS JODIA</span><span class="val">12</span></div>
+      <div class="stat"><span class="label" data-i18n="stat_matches">MATCH JODIA</span><span class="val">47</span></div>
+      <div class="stat"><span class="label" data-i18n="stat_accuracy">PRESIZYON 30J</span><span class="val gold">68%</span></div>
+      <div class="stat"><span class="label" data-i18n="stat_tips">TIPS JODIA</span><span class="val">12</span></div>
     </div>
 
     <div class="filter-block">
-      <div class="filter-label">// KONPETISYON</div>
+      <div class="filter-label" data-i18n="filter_competition">// KONPETISYON</div>
       <div class="filters" id="leagueFilters">
-        <div class="chip active">Tout</div>
+        <div class="chip active" data-i18n="chip_all">Tout</div>
         <div class="chip">Ligue 1</div>
         <div class="chip">Liga</div>
-        <div class="chip">Lig dè Chanpyon</div>
+        <div class="chip" data-i18n="league_champions">Lig dè Chanpyon</div>
         <div class="chip">Serie A</div>
         <div class="chip">Premier League</div>
       </div>
     </div>
 
     <div class="filter-block">
-      <div class="filter-label">// DAT</div>
+      <div class="filter-label" data-i18n="filter_date">// DAT</div>
       <div class="filters" id="dateFilters">
-        <div class="chip active">Jodia</div>
-        <div class="chip">Demen</div>
-        <div class="chip">Apre Demen</div>
-        <div class="chip">Nan 3 Jou</div>
-        <div class="chip">Nan 4 Jou</div>
-        <div class="chip">Nan 5 Jou</div>
+        <div class="chip active" data-i18n="chip_today">Jodia</div>
+        <div class="chip" data-i18n="chip_tomorrow">Demen</div>
+        <div class="chip" data-i18n="chip_after_tomorrow">Apre Demen</div>
+        <div class="chip" data-i18n="chip_in3">Nan 3 Jou</div>
+        <div class="chip" data-i18n="chip_in4">Nan 4 Jou</div>
+        <div class="chip" data-i18n="chip_in5">Nan 5 Jou</div>
       </div>
     </div>
 
@@ -155,7 +128,7 @@
         <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">15:00</span></div>
         <div class="tip-match">Olympique Cité — AS Portuaire</div>
         <div class="tip-bottom">
-          <div class="tip-pick">Total Gòl — <b>Plis 2.5</b></div>
+          <div class="tip-pick"><span data-i18n="market_goals">Total Gòl</span> — <b data-i18n="pick_over25">Plis 2.5</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:82%"></span></div><span class="conf-pct">82%</span></div>
         </div>
       </div>
@@ -164,7 +137,7 @@
         <div class="tip-top"><span class="tip-league mono">SERIE A • JOUNEN 19</span><span class="tip-time mono">18:00</span></div>
         <div class="tip-match">Milano United — Vitesse Roma</div>
         <div class="tip-bottom">
-          <div class="tip-pick">Rezilta Double Chans — <b>1X</b></div>
+          <div class="tip-pick"><span data-i18n="market_double_chance">Rezilta Double Chans</span> — <b>1X</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:74%"></span></div><span class="conf-pct">74%</span></div>
         </div>
       </div>
@@ -174,17 +147,17 @@
         <div class="tip-top"><span class="tip-league mono">LIGA • JOUNEN 21</span><span class="tip-time mono">20:30</span></div>
         <div class="tip-match">Deportivo Sur — Real Norte</div>
         <div class="tip-bottom">
-          <div class="tip-pick">Total Gòl — <b>Plis 3.5</b></div>
+          <div class="tip-pick"><span data-i18n="market_goals">Total Gòl</span> — <b data-i18n="pick_over35">Plis 3.5</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:91%"></span></div><span class="conf-pct">91%</span></div>
         </div>
-        <div class="lock-overlay">🔒 <a href="pronostik-checkout.html">Vin VIP pou dekloke</a></div>
+        <div class="lock-overlay">🔒 <a href="pronostik-checkout.html" data-i18n="unlock_vip">Vin VIP pou dekloke</a></div>
       </div>
 
       <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
         <div class="tip-top"><span class="tip-league mono">PREMIER LEAGUE • JOUNEN 20</span><span class="tip-time mono">17:30</span></div>
         <div class="tip-match">Nordik City — Sport Baie</div>
         <div class="tip-bottom">
-          <div class="tip-pick">Toude Ekip Make — <b>Wi</b></div>
+          <div class="tip-pick"><span data-i18n="market_btts">Toude Ekip Make</span> — <b data-i18n="pick_yes">Wi</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:79%"></span></div><span class="conf-pct">79%</span></div>
         </div>
       </div>
@@ -193,7 +166,7 @@
         <div class="tip-top"><span class="tip-league mono">LIG DÈ CHANPYON • JOUNEN 5</span><span class="tip-time mono">16:00</span></div>
         <div class="tip-match">Nord Athletic — Étoile Bleue</div>
         <div class="tip-bottom">
-          <div class="tip-pick">Total Kòne — <b>Plis 9.5</b></div>
+          <div class="tip-pick"><span data-i18n="market_corners">Total Kòne</span> — <b data-i18n="pick_over95">Plis 9.5</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:70%"></span></div><span class="conf-pct">70%</span></div>
         </div>
       </div>
@@ -203,15 +176,15 @@
         <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">21:00</span></div>
         <div class="tip-match">Racing FC — Atlas SC</div>
         <div class="tip-bottom">
-          <div class="tip-pick">Miltip 3 Match — <b>Gwo Kòt</b></div>
+          <div class="tip-pick"><span data-i18n="market_multi">Miltip 3 Match</span> — <b data-i18n="pick_bigodds">Gwo Kòt</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:85%"></span></div><span class="conf-pct">85%</span></div>
         </div>
-        <div class="lock-overlay">🔒 <a href="pronostik-checkout.html">Vin VIP pou dekloke</a></div>
+        <div class="lock-overlay">🔒 <a href="pronostik-checkout.html" data-i18n="unlock_vip">Vin VIP pou dekloke</a></div>
       </div>
 
     </div>
 
-    <div class="load-more" id="loadMoreBtn">Chaje Rès Match Jounen an</div>
+    <div class="load-more" id="loadMoreBtn" data-i18n="load_more">Chaje Rès Match Jounen an</div>
   </div>
 
 <script>
@@ -219,6 +192,56 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_jQWO3I8vDsUJshVYrWbRLg_Zn3Zafjz';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  // ---------- i18n ----------
+  const translations = {
+    ht: {
+      stat_matches:'MATCH JODIA', stat_accuracy:'PRESIZYON 30J', stat_tips:'TIPS JODIA',
+      filter_competition:'// KONPETISYON', filter_date:'// DAT',
+      chip_all:'Tout', chip_today:'Jodia', chip_tomorrow:'Demen', chip_after_tomorrow:'Apre Demen',
+      chip_in3:'Nan 3 Jou', chip_in4:'Nan 4 Jou', chip_in5:'Nan 5 Jou',
+      league_champions:'Lig dè Chanpyon',
+      market_goals:'Total Gòl', market_double_chance:'Rezilta Double Chans', market_btts:'Toude Ekip Make',
+      market_corners:'Total Kòne', market_multi:'Miltip 3 Match',
+      pick_over25:'Plis 2.5', pick_over35:'Plis 3.5', pick_over95:'Plis 9.5', pick_yes:'Wi', pick_bigodds:'Gwo Kòt',
+      unlock_vip:'Vin VIP pou dekloke',
+      load_more:'Chaje Rès Match Jounen an', load_more_done:'Pa gen plis match pou jodia a',
+      plan_gratis:'PLAN GRATIS', plan_pro:'PLAN PRO', plan_vip:'PLAN VIP'
+    },
+    fr: {
+      stat_matches:'MATCHS AUJOURD\\'HUI', stat_accuracy:'PRÉCISION 30J', stat_tips:'TIPS AUJOURD\\'HUI',
+      filter_competition:'// COMPÉTITION', filter_date:'// DATE',
+      chip_all:'Tous', chip_today:'Aujourd\\'hui', chip_tomorrow:'Demain', chip_after_tomorrow:'Après-demain',
+      chip_in3:'Dans 3 Jours', chip_in4:'Dans 4 Jours', chip_in5:'Dans 5 Jours',
+      league_champions:'Ligue des Champions',
+      market_goals:'Total Buts', market_double_chance:'Double Chance', market_btts:'Les Deux Équipes Marquent',
+      market_corners:'Total Corners', market_multi:'Multiple 3 Matchs',
+      pick_over25:'Plus de 2.5', pick_over35:'Plus de 3.5', pick_over95:'Plus de 9.5', pick_yes:'Oui', pick_bigodds:'Grosse Cote',
+      unlock_vip:'Devenez VIP pour débloquer',
+      load_more:'Charger le reste des matchs', load_more_done:'Plus de matchs pour aujourd\\'hui',
+      plan_gratis:'PLAN GRATUIT', plan_pro:'PLAN PRO', plan_vip:'PLAN VIP'
+    }
+  };
+
+  let currentPlanKey = 'gratis';
+  let loadMoreExhausted = false;
+
+  function getLang(){ return localStorage.getItem('betcode_lang') || 'ht'; }
+  function setLang(lang){ localStorage.setItem('betcode_lang', lang); applyTranslations(); }
+  function toggleLang(){ setLang(getLang() === 'ht' ? 'fr' : 'ht'); }
+
+  function applyTranslations(){
+    const lang = getLang();
+    const dict = translations[lang];
+    document.getElementById('langToggle').textContent = lang.toUpperCase();
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.textContent = dict[key];
+    });
+    document.getElementById('planBadge').textContent = dict['plan_' + currentPlanKey];
+    document.getElementById('loadMoreBtn').textContent = loadMoreExhausted ? dict.load_more_done : dict.load_more;
+  }
+
+  // ---------- Auth / profile ----------
   function initials(name){
     if(!name) return '--';
     const parts = name.trim().split(' ').filter(Boolean);
@@ -229,20 +252,13 @@
     const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
     const name = profile?.full_name || session.user.user_metadata?.full_name || '';
     document.getElementById('avatarInitials').textContent = initials(name);
-    const planLabels = { gratis:'PLAN GRATIS', pro:'PLAN PRO', vip:'PLAN VIP' };
-    document.getElementById('planBadge').textContent = planLabels[profile?.plan || 'gratis'];
+    currentPlanKey = profile?.plan || 'gratis';
+    applyTranslations();
   }
 
-  // Checking the session right after an OAuth redirect can briefly race
-  // against Supabase parsing the tokens from the URL. We check immediately,
-  // and if nothing's found yet, give it a short window (listening for the
-  // auth event) before deciding the person really is logged out.
   async function loadUser(){
     const { data: { session } } = await sb.auth.getSession();
-    if(session){
-      populateDashboard(session);
-      return;
-    }
+    if(session){ populateDashboard(session); return; }
 
     let resolved = false;
     const { data: listener } = sb.auth.onAuthStateChange((event, newSession) => {
@@ -267,12 +283,6 @@
     }, 1500);
   }
 
-  async function handleLogout(){
-    await sb.auth.signOut();
-    window.location.href = 'pronostik-auth.html';
-  }
-
-  // Simple visual toggle for filter chips (each group is independent, single-select)
   document.querySelectorAll('.filters').forEach(group => {
     group.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
@@ -283,10 +293,12 @@
   });
 
   document.getElementById('loadMoreBtn').addEventListener('click', function(){
-    this.textContent = 'Pa gen plis match pou jodia a';
+    loadMoreExhausted = true;
+    applyTranslations();
     this.style.cursor = 'default';
   });
 
+  applyTranslations();
   loadUser();
 </script>
 </body>

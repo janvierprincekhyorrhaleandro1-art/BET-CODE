@@ -89,6 +89,12 @@
   .switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--text);transition:transform .15s;}
   .switch.on::after{transform:translateX(18px);background:#0A0A0A;}
 
+  .lang-opt{
+    width:38px;height:32px;border-radius:7px;background:var(--bg-elevated);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+    font-weight:700;color:var(--text-muted);cursor:pointer;
+  }
+  .lang-opt.active{background:var(--gold);border-color:var(--gold);color:#0A0A0A;}
   .danger-link{font-size:12.5px;color:var(--text-muted);text-align:center;margin-top:8px;cursor:pointer;}
   .danger-link:hover{color:var(--red);}
   .confirm-box{
@@ -123,6 +129,7 @@
           <h1 id="profileName">—</h1>
           <div class="email" id="profileEmail">—</div>
           <div class="id-badge">ID KONT: <span id="profileAccountId">-----</span></div>
+        <div class="member-since mono" id="memberSince" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
         </div>
       </div>
 
@@ -164,6 +171,27 @@
         <div class="save-status" id="saveStatus">✓ Chanjman sove</div>
       </div>
 
+      <div class="section-title">// CHANJE MODPAS</div>
+      <div class="card">
+        <div class="field">
+          <label>NOUVO MODPAS</label>
+          <input type="password" id="newPassInput" placeholder="••••••••" minlength="6">
+        </div>
+        <div class="btn btn-primary" style="max-width:180px;" onclick="changePassword()" id="pwBtn">Mete Ajou Modpas</div>
+        <div class="save-status" id="pwStatus">✓ Modpas chanje</div>
+      </div>
+
+      <div class="section-title">// LANG SIT LA</div>
+      <div class="card">
+        <div class="toggle-row" style="border-top:none;padding-top:0;">
+          <div><div class="t-label">Chwazi lang ou pi renmen</div><div class="t-desc">Sa aplike sou tout sit la</div></div>
+          <div style="display:flex;gap:6px;">
+            <div class="lang-opt" id="langOptHT" onclick="setLang('ht')">HT</div>
+            <div class="lang-opt" id="langOptFR" onclick="setLang('fr')">FR</div>
+          </div>
+        </div>
+      </div>
+
       <div class="section-title">// NOTIFIKASYON</div>
       <div class="card">
         <div class="toggle-row">
@@ -188,6 +216,12 @@
           <div class="btn-cancel" onclick="document.getElementById('confirmBox').classList.remove('show')">Anile</div>
           <div class="btn-danger-confirm" id="deleteBtn" onclick="handleDeleteAccount()">Wi, Efase Kont Mwen</div>
         </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;gap:18px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);">
+        <a href="pronostik-legal.html">Kondisyon Sèvis</a>
+        <a href="pronostik-faq.html">Kesyon Frekan</a>
+        <a href="mailto:betcode509@gmail.com">Kontakte Nou</a>
       </div>
     </div>
   </div>
@@ -260,6 +294,11 @@
     document.getElementById('profileName').textContent = profile.full_name || 'Itilizatè';
     document.getElementById('profileEmail').textContent = session.user.email;
     document.getElementById('profileAccountId').textContent = profile.account_id || '-----';
+    const joinDate = profile.created_at ? new Date(profile.created_at) : (session.user.created_at ? new Date(session.user.created_at) : null);
+    if(joinDate){
+      const months = ['Janvye','Fevriye','Mas','Avril','Me','Jen','Jiyè','Out','Septanm','Oktòb','Novanm','Desanm'];
+      document.getElementById('memberSince').textContent = 'Manm depi ' + months[joinDate.getMonth()] + ' ' + joinDate.getFullYear();
+    }
     document.getElementById('avatarInitials').textContent = initials(profile.full_name);
     document.getElementById('nameInput').value = profile.full_name || '';
     document.getElementById('emailInputField').value = session.user.email;
@@ -361,6 +400,40 @@
     window.location.href = 'pronostik-auth.html';
   }
 
+  function getLang(){ return localStorage.getItem('betcode_lang') || 'ht'; }
+  function setLang(lang){
+    localStorage.setItem('betcode_lang', lang);
+    document.getElementById('langOptHT').classList.toggle('active', lang === 'ht');
+    document.getElementById('langOptFR').classList.toggle('active', lang === 'fr');
+  }
+
+  async function changePassword(){
+    const newPass = document.getElementById('newPassInput').value;
+    const statusEl = document.getElementById('pwStatus');
+    if(!newPass || newPass.length < 6){
+      statusEl.textContent = '✗ Modpas la dwe gen omwen 6 karaktè';
+      statusEl.style.color = '#E8574C';
+      statusEl.classList.add('show');
+      return;
+    }
+    const btn = document.getElementById('pwBtn');
+    btn.style.opacity = '0.6';
+    const { error } = await sb.auth.updateUser({ password: newPass });
+    if(!error){
+      statusEl.textContent = '✓ Modpas chanje avèk siksè';
+      statusEl.style.color = '#4CAF7D';
+      document.getElementById('newPassInput').value = '';
+    } else {
+      console.error('Change password error:', error);
+      statusEl.textContent = '✗ Erè: pa t ka chanje modpas la';
+      statusEl.style.color = '#E8574C';
+    }
+    btn.style.opacity = '1';
+    statusEl.classList.add('show');
+    setTimeout(() => statusEl.classList.remove('show'), 3000);
+  }
+
+  setLang(getLang());
   loadProfile();
 </script>
 </body>
