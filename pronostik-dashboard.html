@@ -6,6 +6,7 @@
 <title>Dashboard — BetCode</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#000000;
@@ -28,14 +29,13 @@
   a{color:inherit;text-decoration:none;}
   .wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
 
-  /* Nav */
   nav{
     display:flex;align-items:center;justify-content:space-between;
     padding:18px 0;border-bottom:1px solid var(--border);
   }
   .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.03em;display:flex;align-items:center;gap:8px;}
   .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
-  .user-chip{display:flex;align-items:center;gap:10px;}
+  .user-chip{display:flex;align-items:center;gap:10px;cursor:pointer;}
   .avatar{
     width:34px;height:34px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
     display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
@@ -44,9 +44,9 @@
     font-family:'JetBrains Mono',monospace;font-size:10.5px;background:rgba(232,179,76,0.12);
     color:var(--gold);border:1px solid rgba(232,179,76,0.3);padding:3px 8px;border-radius:5px;letter-spacing:0.05em;
   }
-  .logout{font-size:13px;color:var(--text-muted);margin-left:6px;}
+  .logout{font-size:13px;color:var(--text-muted);margin-left:6px;cursor:pointer;}
+  .logout:hover{color:var(--red,#E8574C);}
 
-  /* Stats — slim rectangle strip */
   .stats{
     display:flex;
     background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;
@@ -59,7 +59,6 @@
   .stat .val.gold{color:var(--gold);}
   @media(max-width:600px){.stats{flex-direction:column;} .stat:not(:last-child){border-right:none;border-bottom:1px solid var(--border);}}
 
-  /* Filters — two stacked rows */
   .filter-block{margin-bottom:20px;}
   .filter-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:0.05em;margin-bottom:8px;}
   .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
@@ -70,12 +69,13 @@
   }
   .chip.active{background:var(--gold);border-color:var(--gold);color:#0A0A0A;font-weight:600;}
 
-  /* Tips list */
   .tips-list{display:flex;flex-direction:column;gap:12px;padding-bottom:60px;}
   .tip-row{
     background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
-    padding:18px 20px;position:relative;overflow:hidden;
+    padding:18px 20px;position:relative;overflow:hidden;cursor:pointer;
+    transition:border-color .15s;
   }
+  .tip-row:hover{border-color:var(--gold);}
   .tip-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
   .tip-league{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);}
   .tip-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);}
@@ -89,6 +89,7 @@
   .conf-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);}
 
   .tip-row.locked .tip-match,.tip-row.locked .tip-bottom{filter:blur(5px);user-select:none;}
+  .tip-row.locked{cursor:default;}
   .lock-tag{
     position:absolute;top:16px;right:18px;font-family:'JetBrains Mono',monospace;font-size:10px;
     background:rgba(232,179,76,0.12);color:var(--gold);border:1px solid rgba(232,179,76,0.3);
@@ -98,22 +99,23 @@
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
     background:rgba(0,0,0,0.55);font-size:13px;color:var(--text-muted);z-index:1;
   }
-  .lock-overlay a{color:var(--gold);font-weight:600;}
+  .lock-overlay a{color:var(--gold);font-weight:600;cursor:pointer;}
 
   .load-more{
     display:block;width:100%;padding:13px 0;background:var(--bg-elevated);border:1px solid var(--border);
     border-radius:8px;color:var(--text-muted);font-size:14px;text-align:center;cursor:pointer;
   }
+  .load-more:hover{border-color:var(--gold);color:var(--text);}
 </style>
 </head>
 <body>
   <div class="wrap">
     <nav>
-      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
-      <div class="user-chip">
-        <span class="plan-badge">PLAN PRO</span>
-        <div class="avatar">JD</div>
-        <span class="logout">Dekonekte</span>
+      <a class="logo" href="index.html"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></a>
+      <div class="user-chip" onclick="window.location.href='pronostik-account.html'">
+        <span class="plan-badge" id="planBadge">PLAN GRATIS</span>
+        <div class="avatar" id="avatarInitials">--</div>
+        <span class="logout" onclick="event.stopPropagation(); handleLogout();">Dekonekte</span>
       </div>
     </nav>
 
@@ -125,7 +127,7 @@
 
     <div class="filter-block">
       <div class="filter-label">// KONPETISYON</div>
-      <div class="filters">
+      <div class="filters" id="leagueFilters">
         <div class="chip active">Tout</div>
         <div class="chip">Ligue 1</div>
         <div class="chip">Liga</div>
@@ -137,7 +139,7 @@
 
     <div class="filter-block">
       <div class="filter-label">// DAT</div>
-      <div class="filters">
+      <div class="filters" id="dateFilters">
         <div class="chip active">Jodia</div>
         <div class="chip">Demen</div>
         <div class="chip">Apre Demen</div>
@@ -149,7 +151,7 @@
 
     <div class="tips-list">
 
-      <div class="tip-row">
+      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
         <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">15:00</span></div>
         <div class="tip-match">Olympique Cité — AS Portuaire</div>
         <div class="tip-bottom">
@@ -158,7 +160,7 @@
         </div>
       </div>
 
-      <div class="tip-row">
+      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
         <div class="tip-top"><span class="tip-league mono">SERIE A • JOUNEN 19</span><span class="tip-time mono">18:00</span></div>
         <div class="tip-match">Milano United — Vitesse Roma</div>
         <div class="tip-bottom">
@@ -167,7 +169,7 @@
         </div>
       </div>
 
-      <div class="tip-row">
+      <div class="tip-row locked">
         <div class="lock-tag mono">VIP</div>
         <div class="tip-top"><span class="tip-league mono">LIGA • JOUNEN 21</span><span class="tip-time mono">20:30</span></div>
         <div class="tip-match">Deportivo Sur — Real Norte</div>
@@ -178,7 +180,7 @@
         <div class="lock-overlay">🔒 <a href="pronostik-checkout.html">Vin VIP pou dekloke</a></div>
       </div>
 
-      <div class="tip-row">
+      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
         <div class="tip-top"><span class="tip-league mono">PREMIER LEAGUE • JOUNEN 20</span><span class="tip-time mono">17:30</span></div>
         <div class="tip-match">Nordik City — Sport Baie</div>
         <div class="tip-bottom">
@@ -187,7 +189,7 @@
         </div>
       </div>
 
-      <div class="tip-row">
+      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
         <div class="tip-top"><span class="tip-league mono">LIG DÈ CHANPYON • JOUNEN 5</span><span class="tip-time mono">16:00</span></div>
         <div class="tip-match">Nord Athletic — Étoile Bleue</div>
         <div class="tip-bottom">
@@ -196,7 +198,7 @@
         </div>
       </div>
 
-      <div class="tip-row">
+      <div class="tip-row locked">
         <div class="lock-tag mono">VIP</div>
         <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">21:00</span></div>
         <div class="tip-match">Racing FC — Atlas SC</div>
@@ -209,7 +211,54 @@
 
     </div>
 
-    <div class="load-more">Chaje Rès Match Jounen an</div>
+    <div class="load-more" id="loadMoreBtn">Chaje Rès Match Jounen an</div>
   </div>
+
+<script>
+  const SUPABASE_URL = 'https://ennivlexjektcwfshozl.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_jQWO3I8vDsUJshVYrWbRLg_Zn3Zafjz';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function initials(name){
+    if(!name) return '--';
+    const parts = name.trim().split(' ').filter(Boolean);
+    return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+  }
+
+  async function loadUser(){
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){
+      window.location.href = 'pronostik-auth.html';
+      return;
+    }
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    const name = profile?.full_name || session.user.user_metadata?.full_name || '';
+    document.getElementById('avatarInitials').textContent = initials(name);
+    const planLabels = { gratis:'PLAN GRATIS', pro:'PLAN PRO', vip:'PLAN VIP' };
+    document.getElementById('planBadge').textContent = planLabels[profile?.plan || 'gratis'];
+  }
+
+  async function handleLogout(){
+    await sb.auth.signOut();
+    window.location.href = 'pronostik-auth.html';
+  }
+
+  // Simple visual toggle for filter chips (each group is independent, single-select)
+  document.querySelectorAll('.filters').forEach(group => {
+    group.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  });
+
+  document.getElementById('loadMoreBtn').addEventListener('click', function(){
+    this.textContent = 'Pa gen plis match pou jodia a';
+    this.style.cursor = 'default';
+  });
+
+  loadUser();
+</script>
 </body>
 </html>
