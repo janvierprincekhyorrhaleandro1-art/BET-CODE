@@ -211,15 +211,28 @@
     }
     currentUserId = session.user.id;
 
-    const { data: profile, error } = await sb
+    let { data: profile, error } = await sb
       .from('profiles')
       .select('*')
       .eq('id', currentUserId)
       .single();
 
     if(error || !profile){
-      document.getElementById('loadingState').textContent = 'Nou pa rive chaje pwofil ou. Eseye rafrechi paj la.';
-      return;
+      // No profile row yet (e.g. account created before the profile trigger existed) — create one now.
+      const fallbackName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
+      const newAccountId = String(Math.floor(10000 + Math.random() * 90000));
+      const { data: created, error: createErr } = await sb
+        .from('profiles')
+        .insert({ id: currentUserId, account_id: newAccountId, full_name: fallbackName })
+        .select()
+        .single();
+
+      if(createErr || !created){
+        console.error('Profile self-heal failed:', createErr);
+        document.getElementById('loadingState').textContent = 'Nou pa rive chaje pwofil ou. Eseye rafrechi paj la.';
+        return;
+      }
+      profile = created;
     }
 
     document.getElementById('profileName').textContent = profile.full_name || 'Itilizatè';

@@ -109,15 +109,6 @@
 </style>
 </head>
 <body>
-  <div id="debugPanel" style="background:#1a0000;border:2px solid #E8574C;color:#fff;padding:14px;font-family:monospace;font-size:11px;word-break:break-all;line-height:1.6;">
-    <b style="color:#E8B34C;">DEBUG PANEL (temporè)</b><br>
-    URL: <span id="dbgUrl">...</span><br>
-    Gen hash (#)? <span id="dbgHash">...</span><br>
-    Gen kòd (?code=)? <span id="dbgCode">...</span><br>
-    Sesyon jwenn (1ye tès): <span id="dbgSession1">...</span><br>
-    Sesyon jwenn (apre tann): <span id="dbgSession2">...</span><br>
-    Erè: <span id="dbgError">okenn</span>
-  </div>
   <div class="wrap">
     <nav>
       <a class="logo" href="index.html"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></a>
@@ -247,52 +238,31 @@
   // and if nothing's found yet, give it a short window (listening for the
   // auth event) before deciding the person really is logged out.
   async function loadUser(){
-    document.getElementById('dbgUrl').textContent = window.location.href;
-    document.getElementById('dbgHash').textContent = window.location.hash ? 'WI — ' + window.location.hash.substring(0,60) : 'NON';
-    document.getElementById('dbgCode').textContent = window.location.search.includes('code=') ? 'WI — ' + window.location.search : 'NON';
-
-    let session1;
-    try {
-      const r = await sb.auth.getSession();
-      session1 = r.data.session;
-      document.getElementById('dbgSession1').textContent = session1 ? 'WI (' + session1.user.id.substring(0,8) + ')' : 'NON';
-    } catch(e){
-      document.getElementById('dbgError').textContent = 'getSession() 1: ' + (e.message || e);
-    }
-
-    if(session1){
-      document.getElementById('dbgSession2').textContent = 'pa nesesè';
-      populateDashboard(session1);
+    const { data: { session } } = await sb.auth.getSession();
+    if(session){
+      populateDashboard(session);
       return;
     }
 
     let resolved = false;
     const { data: listener } = sb.auth.onAuthStateChange((event, newSession) => {
-      document.getElementById('dbgError').textContent = 'onAuthStateChange event: ' + event + (newSession ? ' (gen sesyon)' : ' (san sesyon)');
       if(newSession && !resolved){
         resolved = true;
         listener.subscription.unsubscribe();
-        document.getElementById('dbgSession2').textContent = 'WI (via onAuthStateChange)';
         populateDashboard(newSession);
       }
     });
 
     setTimeout(async () => {
       if(resolved) return;
-      try {
-        const { data: { session: retrySession } } = await sb.auth.getSession();
-        if(retrySession){
-          resolved = true;
-          listener.subscription.unsubscribe();
-          document.getElementById('dbgSession2').textContent = 'WI (apre tann)';
-          populateDashboard(retrySession);
-        } else {
-          listener.subscription.unsubscribe();
-          document.getElementById('dbgSession2').textContent = 'NON — ap voye tounen sou login nan 5 segond';
-          setTimeout(() => window.location.href = 'pronostik-auth.html', 5000);
-        }
-      } catch(e){
-        document.getElementById('dbgError').textContent = 'getSession() 2: ' + (e.message || e);
+      const { data: { session: retrySession } } = await sb.auth.getSession();
+      if(retrySession){
+        resolved = true;
+        listener.subscription.unsubscribe();
+        populateDashboard(retrySession);
+      } else {
+        listener.subscription.unsubscribe();
+        window.location.href = 'pronostik-auth.html';
       }
     }, 1500);
   }
