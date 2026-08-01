@@ -92,15 +92,19 @@
 
     <form id="authForm" onsubmit="handleSubmit(event)">
       <div class="field signup-only">
-        <label>NON</label>
+        <label>NON KONPLÈ</label>
         <input type="text" placeholder="Jan yo rele w" id="nameInput">
       </div>
-      <div class="field">
+      <div class="field signup-only">
         <label>NIMEWO TELEFÒN</label>
         <div class="phone-row">
           <div class="phone-prefix">+509</div>
-          <input type="tel" placeholder="31066407" required id="phoneInput" inputmode="numeric" maxlength="8">
+          <input type="tel" placeholder="4821****" id="phoneInput" inputmode="numeric" maxlength="8">
         </div>
+      </div>
+      <div class="field">
+        <label>IMEL</label>
+        <input type="email" placeholder="ou@egzanp.com" required id="emailInput">
       </div>
       <div class="field">
         <label>MODPAS</label>
@@ -158,8 +162,7 @@
   async function handleSubmit(e){
     e.preventDefault();
     hideStatus();
-    const phoneDigits = document.getElementById('phoneInput').value.trim();
-    const phone = '+509' + phoneDigits;
+    const email = document.getElementById('emailInput').value.trim();
     const password = document.getElementById('passInput').value;
     const isSignup = document.getElementById('card').classList.contains('signup-mode');
     const btn = document.getElementById('submitBtn');
@@ -172,12 +175,14 @@
       let result;
       if(isSignup){
         const name = document.getElementById('nameInput').value.trim();
+        const phoneDigits = document.getElementById('phoneInput').value.trim();
+        const phone = phoneDigits ? ('+509' + phoneDigits) : null;
         result = await sb.auth.signUp({
-          phone, password,
-          options: { data: { full_name: name } }
+          email, password,
+          options: { data: { full_name: name, phone } }
         });
       } else {
-        result = await sb.auth.signInWithPassword({ phone, password });
+        result = await sb.auth.signInWithPassword({ email, password });
       }
 
       if(result.error){
