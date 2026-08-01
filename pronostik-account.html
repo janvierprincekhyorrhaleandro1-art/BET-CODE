@@ -11,7 +11,7 @@
   :root{
     --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
     --gold:#E8B34C; --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
-    --red:#E8574C;
+    --red:#E8574C; --win:#4CAF7D;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
@@ -29,6 +29,7 @@
   .logout-link:hover{color:var(--red);}
 
   .loading-state{text-align:center;padding:60px 0;color:var(--text-muted);font-size:14px;}
+  #pageContent{display:none;}
 
   .profile-head{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
   .avatar-big{
@@ -59,14 +60,24 @@
   .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
 
   .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
   .field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.03em;}
   .field input{
     width:100%;padding:12px 14px;background:var(--bg-elevated);border:1px solid var(--border);
     border-radius:8px;color:var(--text);font-size:14.5px;font-family:'Inter',sans-serif;
   }
   .field input:focus{outline:none;border-color:var(--gold);}
+  .field input:disabled{opacity:0.5;cursor:not-allowed;}
+  .field-note{font-size:11px;color:var(--text-muted);margin-top:5px;}
+  .phone-row{display:flex;gap:8px;}
+  .phone-prefix{
+    flex-shrink:0;width:64px;padding:12px 10px;background:var(--bg-elevated);border:1px solid var(--border);
+    border-radius:8px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .phone-row input{font-family:'JetBrains Mono',monospace;}
 
-  .save-status{font-size:12px;color:var(--win, #4CAF7D);margin-top:8px;display:none;}
+  .save-status{font-size:12px;margin-top:10px;display:none;}
   .save-status.show{display:block;}
 
   .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--border);}
@@ -89,15 +100,14 @@
   .confirm-box .warn-text{font-size:12.5px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;}
   .confirm-actions{display:flex;gap:10px;}
   .btn-danger-confirm{flex:1;padding:10px 0;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--red);color:#1A0605;}
+  .btn-danger-confirm:disabled{opacity:0.6;cursor:not-allowed;}
   .btn-cancel{flex:1;padding:10px 0;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);}
-
-  #pageContent{display:none;}
 </style>
 </head>
 <body>
   <div class="wrap">
     <nav>
-      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <a class="logo" href="index.html"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></a>
       <div class="nav-right">
         <a class="back" href="pronostik-dashboard.html">← Retounen</a>
         <span class="logout-link" onclick="handleLogout()">Dekonekte</span>
@@ -134,9 +144,23 @@
 
       <div class="section-title">// PWOFIL</div>
       <div class="card">
-        <div class="field"><label>NON</label><input type="text" id="nameInput"></div>
-        <div class="field"><label>IMEL</label><input type="email" id="emailInputField" disabled></div>
-        <div class="btn btn-primary" style="max-width:180px;" onclick="saveProfile()">Sove Chanjman</div>
+        <div class="field">
+          <label>NON KONPLÈ</label>
+          <input type="text" id="nameInput">
+        </div>
+        <div class="field">
+          <label>NIMEWO TELEFÒN</label>
+          <div class="phone-row">
+            <div class="phone-prefix">+509</div>
+            <input type="tel" id="phoneInput" inputmode="numeric" maxlength="8" placeholder="4821****">
+          </div>
+        </div>
+        <div class="field">
+          <label>IMEL</label>
+          <input type="email" id="emailInputField" disabled>
+          <div class="field-note">Imel la sèvi pou konekte — kontakte sipò pou chanje l.</div>
+        </div>
+        <div class="btn btn-primary" style="max-width:180px;" onclick="saveProfile()" id="saveBtn">Sove Chanjman</div>
         <div class="save-status" id="saveStatus">✓ Chanjman sove</div>
       </div>
 
@@ -144,15 +168,15 @@
       <div class="card">
         <div class="toggle-row">
           <div><div class="t-label">Nouvo tips chak jou</div><div class="t-desc">Resevwa yon notifikasyon lè nou pibliye tips jounen an</div></div>
-          <div class="switch on"></div>
+          <div class="switch" id="toggleDaily" onclick="toggleNotif('daily_tips', this)"></div>
         </div>
         <div class="toggle-row">
           <div><div class="t-label">Tips gwo konfyans (90%+)</div><div class="t-desc">Alèt imedya pou tips ki gen pi wo nivo konfyans</div></div>
-          <div class="switch on"></div>
+          <div class="switch" id="toggleHighConf" onclick="toggleNotif('high_confidence', this)"></div>
         </div>
         <div class="toggle-row">
           <div><div class="t-label">Imel maketing</div><div class="t-desc">Ofrann ak nouvèl sou sèvis la</div></div>
-          <div class="switch"></div>
+          <div class="switch" id="toggleMarketing" onclick="toggleNotif('marketing', this)"></div>
         </div>
       </div>
 
@@ -162,7 +186,7 @@
         <div class="warn-text">Sa ap efase tout done ou yo pou tout tan, san posiblite pou retabli yo. Aksyon sa a pa ka anile.</div>
         <div class="confirm-actions">
           <div class="btn-cancel" onclick="document.getElementById('confirmBox').classList.remove('show')">Anile</div>
-          <div class="btn-danger-confirm">Wi, Efase Kont Mwen</div>
+          <div class="btn-danger-confirm" id="deleteBtn" onclick="handleDeleteAccount()">Wi, Efase Kont Mwen</div>
         </div>
       </div>
     </div>
@@ -174,6 +198,7 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let currentUserId = null;
+  let notifPrefs = { daily_tips: true, high_confidence: true, marketing: false };
 
   function initials(name){
     if(!name) return '--';
@@ -185,7 +210,6 @@
     let { data: { session } } = await sb.auth.getSession();
 
     if(!session){
-      // Give an in-flight OAuth redirect a brief window to finish before bouncing to login
       session = await new Promise((resolve) => {
         let resolved = false;
         const { data: listener } = sb.auth.onAuthStateChange((event, newSession) => {
@@ -218,7 +242,6 @@
       .single();
 
     if(error || !profile){
-      // No profile row yet (e.g. account created before the profile trigger existed) — create one now.
       const fallbackName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
       const newAccountId = String(Math.floor(10000 + Math.random() * 90000));
       const { data: created, error: createErr } = await sb
@@ -226,7 +249,6 @@
         .insert({ id: currentUserId, account_id: newAccountId, full_name: fallbackName })
         .select()
         .single();
-
       if(createErr || !created){
         console.error('Profile self-heal failed:', createErr);
         document.getElementById('loadingState').textContent = 'Nou pa rive chaje pwofil ou. Eseye rafrechi paj la.';
@@ -241,6 +263,14 @@
     document.getElementById('avatarInitials').textContent = initials(profile.full_name);
     document.getElementById('nameInput').value = profile.full_name || '';
     document.getElementById('emailInputField').value = session.user.email;
+    document.getElementById('phoneInput').value = (profile.phone || '').replace('+509', '');
+
+    if(profile.notif_prefs){
+      notifPrefs = profile.notif_prefs;
+    }
+    document.getElementById('toggleDaily').classList.toggle('on', !!notifPrefs.daily_tips);
+    document.getElementById('toggleHighConf').classList.toggle('on', !!notifPrefs.high_confidence);
+    document.getElementById('toggleMarketing').classList.toggle('on', !!notifPrefs.marketing);
 
     const plan = profile.plan || 'gratis';
     const planLabels = { gratis:'Gratis', pro:'Pro', vip:'VIP' };
@@ -254,23 +284,76 @@
 
   async function saveProfile(){
     const newName = document.getElementById('nameInput').value.trim();
+    const phoneDigits = document.getElementById('phoneInput').value.trim();
+    const phone = phoneDigits ? ('+509' + phoneDigits) : null;
+    const btn = document.getElementById('saveBtn');
+    const statusEl = document.getElementById('saveStatus');
+    btn.style.opacity = '0.6';
+
     const { error } = await sb
       .from('profiles')
-      .update({ full_name: newName })
+      .update({ full_name: newName, phone })
       .eq('id', currentUserId);
 
-    const statusEl = document.getElementById('saveStatus');
     if(!error){
       document.getElementById('profileName').textContent = newName;
       document.getElementById('avatarInitials').textContent = initials(newName);
       statusEl.textContent = '✓ Chanjman sove';
       statusEl.style.color = '#4CAF7D';
     } else {
+      console.error('Save profile error:', error);
       statusEl.textContent = '✗ Erè: pa t ka sove chanjman an';
       statusEl.style.color = '#E8574C';
     }
+    btn.style.opacity = '1';
     statusEl.classList.add('show');
     setTimeout(() => statusEl.classList.remove('show'), 3000);
+  }
+
+  async function toggleNotif(key, el){
+    const newVal = !el.classList.contains('on');
+    el.classList.toggle('on', newVal);
+    notifPrefs[key] = newVal;
+    const { error } = await sb
+      .from('profiles')
+      .update({ notif_prefs: notifPrefs })
+      .eq('id', currentUserId);
+    if(error){
+      console.error('Notif save error:', error);
+      el.classList.toggle('on', !newVal);
+      notifPrefs[key] = !newVal;
+    }
+  }
+
+  async function handleDeleteAccount(){
+    const btn = document.getElementById('deleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Ap efase...';
+
+    const { error } = await sb.rpc('delete_user');
+
+    if(error){
+      console.error('Delete account error:', error);
+      btn.disabled = false;
+      btn.textContent = 'Wi, Efase Kont Mwen';
+      showDeleteError();
+      return;
+    }
+
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  function showDeleteError(){
+    const box = document.getElementById('confirmBox');
+    let errEl = document.getElementById('deleteErr');
+    if(!errEl){
+      errEl = document.createElement('div');
+      errEl.id = 'deleteErr';
+      errEl.style.cssText = 'color:#E8574C;font-size:12px;margin-top:10px;';
+      box.appendChild(errEl);
+    }
+    errEl.textContent = 'Nou pa t ka efase kont lan. Eseye ankò pita.';
   }
 
   async function handleLogout(){
