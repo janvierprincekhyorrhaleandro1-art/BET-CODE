@@ -26,11 +26,17 @@
   }
   .logo{
     display:flex; align-items:center; justify-content:center; gap:8px;
-    font-family:'Bebas Neue',sans-serif; font-weight:700; font-size:19px; margin-bottom:8px;
+    font-family:'Bebas Neue',sans-serif; font-weight:700; font-size:19px; margin-bottom:28px;
   }
   .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
-  h1.title{font-size:21px;text-align:center;margin-bottom:6px;}
-  .desc{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:26px;line-height:1.6;}
+  .tabs{
+    display:flex; background:var(--bg-elevated); border-radius:9px; padding:4px; margin-bottom:24px;
+  }
+  .tab{
+    flex:1; text-align:center; padding:9px 0; border-radius:6px; font-size:13.5px;
+    font-weight:600; cursor:pointer; color:var(--text-muted); transition:all .15s;
+  }
+  .tab.active{background:var(--gold); color:#0A0A0A;}
   .field{margin-bottom:16px;}
   .field label{
     display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;
@@ -42,7 +48,13 @@
   }
   .field input:focus{outline:none; border-color:var(--gold);}
   .field input::placeholder{color:#4A5468;}
-  #codeInput{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:0.4em;text-align:center;}
+  .phone-row{display:flex;gap:8px;}
+  .phone-prefix{
+    flex-shrink:0; width:76px; padding:12px 10px; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .phone-row input{font-family:'JetBrains Mono',monospace;}
   .btn-submit{
     width:100%; padding:13px 0; background:var(--gold); color:#0A0A0A; border:none;
     border-radius:8px; font-weight:700; font-size:14.5px; cursor:pointer; margin-top:6px;
@@ -55,7 +67,9 @@
   }
   .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
   .fine{text-align:center; font-size:12px; color:var(--text-muted); margin-top:18px; line-height:1.6;}
-  .fine a{color:var(--gold); cursor:pointer;}
+  .fine a{color:var(--gold);}
+  .signup-only{display:none;}
+  .signup-mode .signup-only{display:block;}
   .status-msg{
     font-size:12.5px; padding:10px 12px; border-radius:8px; margin-bottom:20px;
     font-family:'JetBrains Mono',monospace; line-height:1.5; display:none;
@@ -63,56 +77,43 @@
   .status-msg.show{display:block;}
   .status-msg.error{background:rgba(232,87,76,0.1); border:1px solid rgba(232,87,76,0.3); color:var(--red);}
   .status-msg.success{background:rgba(76,175,125,0.1); border:1px solid rgba(76,175,125,0.3); color:var(--win);}
-  .step{display:none;}
-  .step.active{display:block;}
-  .resend{text-align:center;font-size:12.5px;color:var(--text-muted);margin-top:14px;}
-  .resend a{color:var(--gold);cursor:pointer;}
 </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="card">
     <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
 
     <div class="status-msg" id="statusMsg"></div>
 
-    <!-- STEP 1: Email -->
-    <div class="step active" id="stepEmail">
-      <h1 class="title">Konekte oswa Kreye Kont</h1>
-      <div class="desc">Antre imel ou — n ap voye w yon kòd verifikasyon 6 chif.</div>
-
-      <form onsubmit="sendCode(event)">
-        <div class="field">
-          <label>NON (SI SE PREMYE FWA)</label>
-          <input type="text" placeholder="Jan yo rele w" id="nameInput">
-        </div>
-        <div class="field">
-          <label>IMEL</label>
-          <input type="email" placeholder="ou@egzanp.com" required id="emailInput">
-        </div>
-        <button type="submit" class="btn-submit" id="sendBtn">Voye Kòd la</button>
-      </form>
-
-      <div class="divider">OSWA</div>
-      <button class="btn-submit" style="background:var(--bg-elevated); color:var(--text); border:1px solid var(--border);" onclick="handleGoogle()">Kontinye ak Google</button>
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="setMode('login')">Konekte</div>
+      <div class="tab" id="tabSignup" onclick="setMode('signup')">Kreye Kont</div>
     </div>
 
-    <!-- STEP 2: Code -->
-    <div class="step" id="stepCode">
-      <h1 class="title">Antre Kòd la</h1>
-      <div class="desc">Nou voye yon kòd 6 chif nan <b id="emailDisplay" style="color:var(--text)"></b></div>
-
-      <form onsubmit="verifyCode(event)">
-        <div class="field">
-          <label>KÒD VERIFIKASYON</label>
-          <input type="text" placeholder="000000" maxlength="6" required id="codeInput" inputmode="numeric">
+    <form id="authForm" onsubmit="handleSubmit(event)">
+      <div class="field signup-only">
+        <label>NON</label>
+        <input type="text" placeholder="Jan yo rele w" id="nameInput">
+      </div>
+      <div class="field">
+        <label>NIMEWO TELEFÒN</label>
+        <div class="phone-row">
+          <div class="phone-prefix">+509</div>
+          <input type="tel" placeholder="31066407" required id="phoneInput" inputmode="numeric" maxlength="8">
         </div>
-        <button type="submit" class="btn-submit" id="verifyBtn">Konfime</button>
-      </form>
-      <div class="resend">Pa resevwa l? <a onclick="resendCode()">Voye kòd ankò</a> · <a onclick="backToEmail()">Chanje imel</a></div>
-    </div>
+      </div>
+      <div class="field">
+        <label>MODPAS</label>
+        <input type="password" placeholder="••••••••" required id="passInput" minlength="6">
+      </div>
+      <button type="submit" class="btn-submit" id="submitBtn">Konekte</button>
+    </form>
+
+    <div class="divider">OSWA</div>
+    <button class="btn-submit" style="background:var(--bg-elevated); color:var(--text); border:1px solid var(--border);" onclick="handleGoogle()">Kontinye ak Google</button>
 
     <div class="fine">
-      Lè w kontinye, ou aksepte Kondisyon Sèvis nou yo.<br>
+      Lè w kreye yon kont, ou aksepte Kondisyon Sèvis nou yo.<br>
       Sèvis sa a rezève pou moun <b>18 an oswa plis</b>.
     </div>
   </div>
@@ -122,7 +123,20 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_jQWO3I8vDsUJshVYrWbRLg_Zn3Zafjz';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  let pendingEmail = '';
+  function setMode(mode){
+    const card = document.getElementById('card');
+    const btn = document.getElementById('submitBtn');
+    document.getElementById('tabLogin').classList.toggle('active', mode==='login');
+    document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
+    hideStatus();
+    if(mode==='signup'){
+      card.classList.add('signup-mode');
+      btn.textContent = 'Kreye Kont';
+    } else {
+      card.classList.remove('signup-mode');
+      btn.textContent = 'Konekte';
+    }
+  }
 
   function showStatus(msg, type){
     const el = document.getElementById('statusMsg');
@@ -141,73 +155,57 @@
     return 'Yon erè initil pase (kod: ' + (err.status || err.code || '?') + ').';
   }
 
-  async function sendCode(e){
+  async function handleSubmit(e){
     e.preventDefault();
     hideStatus();
-    const email = document.getElementById('emailInput').value.trim();
-    const name = document.getElementById('nameInput').value.trim();
-    const btn = document.getElementById('sendBtn');
+    const phoneDigits = document.getElementById('phoneInput').value.trim();
+    const phone = '+509' + phoneDigits;
+    const password = document.getElementById('passInput').value;
+    const isSignup = document.getElementById('card').classList.contains('signup-mode');
+    const btn = document.getElementById('submitBtn');
+    const originalLabel = btn.textContent;
+
     btn.disabled = true;
-    btn.textContent = 'Ap voye...';
+    btn.textContent = 'Tann...';
 
     try {
-      const { error } = await sb.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: true, data: { full_name: name } }
-      });
-      if(error){
-        showStatus(extractErrorMessage(error), 'error');
+      let result;
+      if(isSignup){
+        const name = document.getElementById('nameInput').value.trim();
+        result = await sb.auth.signUp({
+          phone, password,
+          options: { data: { full_name: name } }
+        });
       } else {
-        pendingEmail = email;
-        document.getElementById('emailDisplay').textContent = email;
-        document.getElementById('stepEmail').classList.remove('active');
-        document.getElementById('stepCode').classList.add('active');
+        result = await sb.auth.signInWithPassword({ phone, password });
+      }
+
+      if(result.error){
+        console.error('Auth error:', result.error);
+        showStatus(extractErrorMessage(result.error), 'error');
+      } else if(isSignup){
+        showStatus('Kont kreye avèk siksè!', 'success');
+        setTimeout(() => window.location.href = 'pronostik-dashboard.html', 1200);
+      } else {
+        showStatus('Ou konekte!', 'success');
+        setTimeout(() => window.location.href = 'pronostik-dashboard.html', 800);
       }
     } catch(err){
+      console.error('Unexpected error:', err);
       showStatus(extractErrorMessage(err), 'error');
     }
+
     btn.disabled = false;
-    btn.textContent = 'Voye Kòd la';
-  }
-
-  async function verifyCode(e){
-    e.preventDefault();
-    hideStatus();
-    const code = document.getElementById('codeInput').value.trim();
-    const btn = document.getElementById('verifyBtn');
-    btn.disabled = true;
-    btn.textContent = 'Ap tcheke...';
-
-    try {
-      const { error } = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: 'email' });
-      if(error){
-        showStatus(extractErrorMessage(error), 'error');
-      } else {
-        showStatus('Ou konekte avèk siksè! (Pwochèn etap: dashboard la)', 'success');
-      }
-    } catch(err){
-      showStatus(extractErrorMessage(err), 'error');
-    }
-    btn.disabled = false;
-    btn.textContent = 'Konfime';
-  }
-
-  async function resendCode(){
-    hideStatus();
-    const { error } = await sb.auth.signInWithOtp({ email: pendingEmail, options: { shouldCreateUser: true } });
-    showStatus(error ? extractErrorMessage(error) : 'Nou voye yon nouvo kòd.', error ? 'error' : 'success');
-  }
-
-  function backToEmail(){
-    hideStatus();
-    document.getElementById('stepCode').classList.remove('active');
-    document.getElementById('stepEmail').classList.add('active');
+    btn.textContent = originalLabel;
   }
 
   async function handleGoogle(){
     hideStatus();
-    const { error } = await sb.auth.signInWithOAuth({ provider: 'google' });
-    if(error) showStatus('Google poko konfigire sou kont sa a.', 'error');
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/pronostik-dashboard.html' }
+    });
+    if(error) showStatus(extractErrorMessage(error), 'error');
   }
 </script>
 </body>
