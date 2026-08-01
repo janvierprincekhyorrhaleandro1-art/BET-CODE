@@ -182,7 +182,29 @@
   }
 
   async function loadProfile(){
-    const { data: { session } } = await sb.auth.getSession();
+    let { data: { session } } = await sb.auth.getSession();
+
+    if(!session){
+      // Give an in-flight OAuth redirect a brief window to finish before bouncing to login
+      session = await new Promise((resolve) => {
+        let resolved = false;
+        const { data: listener } = sb.auth.onAuthStateChange((event, newSession) => {
+          if(newSession && !resolved){
+            resolved = true;
+            listener.subscription.unsubscribe();
+            resolve(newSession);
+          }
+        });
+        setTimeout(async () => {
+          if(resolved) return;
+          const { data: { session: retrySession } } = await sb.auth.getSession();
+          resolved = true;
+          listener.subscription.unsubscribe();
+          resolve(retrySession);
+        }, 1500);
+      });
+    }
+
     if(!session){
       window.location.href = 'pronostik-auth.html';
       return;

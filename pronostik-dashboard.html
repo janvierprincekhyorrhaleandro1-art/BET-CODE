@@ -225,17 +225,46 @@
     return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
   }
 
-  async function loadUser(){
-    const { data: { session } } = await sb.auth.getSession();
-    if(!session){
-      window.location.href = 'pronostik-auth.html';
-      return;
-    }
+  async function populateDashboard(session){
     const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
     const name = profile?.full_name || session.user.user_metadata?.full_name || '';
     document.getElementById('avatarInitials').textContent = initials(name);
     const planLabels = { gratis:'PLAN GRATIS', pro:'PLAN PRO', vip:'PLAN VIP' };
     document.getElementById('planBadge').textContent = planLabels[profile?.plan || 'gratis'];
+  }
+
+  // Checking the session right after an OAuth redirect can briefly race
+  // against Supabase parsing the tokens from the URL. We check immediately,
+  // and if nothing's found yet, give it a short window (listening for the
+  // auth event) before deciding the person really is logged out.
+  async function loadUser(){
+    const { data: { session } } = await sb.auth.getSession();
+    if(session){
+      populateDashboard(session);
+      return;
+    }
+
+    let resolved = false;
+    const { data: listener } = sb.auth.onAuthStateChange((event, newSession) => {
+      if(newSession && !resolved){
+        resolved = true;
+        listener.subscription.unsubscribe();
+        populateDashboard(newSession);
+      }
+    });
+
+    setTimeout(async () => {
+      if(resolved) return;
+      const { data: { session: retrySession } } = await sb.auth.getSession();
+      if(retrySession){
+        resolved = true;
+        listener.subscription.unsubscribe();
+        populateDashboard(retrySession);
+      } else {
+        listener.subscription.unsubscribe();
+        window.location.href = 'pronostik-auth.html';
+      }
+    }, 1500);
   }
 
   async function handleLogout(){
