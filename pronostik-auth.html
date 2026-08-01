@@ -69,7 +69,9 @@
   .fine{text-align:center; font-size:12px; color:var(--text-muted); margin-top:18px; line-height:1.6;}
   .fine a{color:var(--gold);}
   .signup-only{display:none;}
+  .login-only{display:block;}
   .signup-mode .signup-only{display:block;}
+  .signup-mode .login-only{display:none;}
   .status-msg{
     font-size:12.5px; padding:10px 12px; border-radius:8px; margin-bottom:20px;
     font-family:'JetBrains Mono',monospace; line-height:1.5; display:none;
@@ -91,9 +93,14 @@
     </div>
 
     <form id="authForm" onsubmit="handleSubmit(event)">
-      <div class="field">
+      <div class="field signup-only">
         <label>NON KONPLÈ</label>
-        <input type="text" placeholder="Jan yo rele w" required id="nameInput">
+        <input type="text" placeholder="Jan yo rele w" id="nameInput">
+      </div>
+
+      <div class="field signup-only">
+        <label>IMEL</label>
+        <input type="email" placeholder="ou@egzanp.com" id="emailInput">
       </div>
       <div class="field signup-only">
         <label>NIMEWO TELEFÒN</label>
@@ -102,6 +109,12 @@
           <input type="tel" placeholder="4821****" id="phoneInput" inputmode="numeric" maxlength="8">
         </div>
       </div>
+
+      <div class="field login-only">
+        <label>IMEL OSWA NIMEWO TELEFÒN</label>
+        <input type="text" placeholder="ou@egzanp.com oswa 31066407" id="identifierInput">
+      </div>
+
       <div class="field">
         <label>MODPAS</label>
         <input type="password" placeholder="••••••••" required id="passInput" minlength="6">
@@ -132,9 +145,11 @@
     if(mode==='signup'){
       card.classList.add('signup-mode');
       btn.textContent = 'Kreye Kont';
+      document.getElementById('emailInput').required = true;
     } else {
       card.classList.remove('signup-mode');
       btn.textContent = 'Konekte';
+      document.getElementById('emailInput').required = false;
     }
   }
 
@@ -155,24 +170,17 @@
     return 'Yon erè initil pase (kod: ' + (err.status || err.code || '?') + ').';
   }
 
-  // Turns a full name into a stable, internal-only pseudo-email so Supabase
-  // (which always needs a unique email or phone under the hood) can be used
-  // with just "name + password" — no real email or SMS involved.
-  function nameToEmail(name){
-    const slug = name
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]/g, '');
-    return slug + '@betcode.app';
+  function normalizePhone(raw){
+    let digits = raw.replace(/[^\d]/g, '');
+    if(digits.length === 8) digits = '509' + digits;
+    return '+' + digits;
   }
 
   async function handleSubmit(e){
     e.preventDefault();
     hideStatus();
-    const name = document.getElementById('nameInput').value.trim();
     const password = document.getElementById('passInput').value;
     const isSignup = document.getElementById('card').classList.contains('signup-mode');
-    const pseudoEmail = nameToEmail(name);
     const btn = document.getElementById('submitBtn');
     const originalLabel = btn.textContent;
 
@@ -181,24 +189,41 @@
 
     try {
       let result;
+
       if(isSignup){
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
         const phoneDigits = document.getElementById('phoneInput').value.trim();
-        const phone = phoneDigits ? ('+509' + phoneDigits) : null;
+        const phone = phoneDigits ? normalizePhone(phoneDigits) : null;
+
         result = await sb.auth.signUp({
-          email: pseudoEmail, password,
+          email, password,
           options: { data: { full_name: name, phone } }
         });
+
       } else {
-        result = await sb.auth.signInWithPassword({ email: pseudoEmail, password });
+        const identifier = document.getElementById('identifierInput').value.trim();
+        let loginEmail = identifier;
+
+        if(!identifier.includes('@')){
+          // Treat as phone — look up which email it's registered under
+          const phone = normalizePhone(identifier);
+          const { data: foundEmail, error: lookupErr } = await sb.rpc('get_email_by_phone', { phone_input: phone });
+          if(lookupErr || !foundEmail){
+            showStatus('Nou pa jwenn okenn kont ak nimewo telefòn sa a.', 'error');
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+            return;
+          }
+          loginEmail = foundEmail;
+        }
+
+        result = await sb.auth.signInWithPassword({ email: loginEmail, password });
       }
 
       if(result.error){
         console.error('Auth error:', result.error);
-        let msg = extractErrorMessage(result.error);
-        if(msg.includes('already registered') || msg.includes('already been registered')){
-          msg = 'Gen yon lòt kont ki deja itilize menm non sa a. Eseye yon non yon ti jan diferan (pa egzanp ajoute yon dezyèm siyati).';
-        }
-        showStatus(msg, 'error');
+        showStatus(extractErrorMessage(result.error), 'error');
       } else if(isSignup){
         showStatus('Kont kreye avèk siksè!', 'success');
         setTimeout(() => window.location.href = 'pronostik-dashboard.html', 1200);
