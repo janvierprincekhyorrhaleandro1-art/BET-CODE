@@ -122,8 +122,7 @@
       <button type="submit" class="btn-submit" id="submitBtn">Konekte</button>
     </form>
 
-    <div class="divider">OSWA</div>
-    <button class="btn-submit" style="background:var(--bg-elevated); color:var(--text); border:1px solid var(--border);" onclick="handleGoogle()">Kontinye ak Google</button>
+    <div class="fine" style="margin-top:6px;"><a href="pronostik-forgot-password.html">Bliye modpas ou?</a></div>
 
     <div class="fine">
       Lè w kreye yon kont, ou aksepte Kondisyon Sèvis nou yo.<br>
@@ -240,14 +239,6 @@
     btn.textContent = originalLabel;
   }
 
-  async function handleGoogle(){
-    hideStatus();
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + '/pronostik-dashboard.html' }
-    });
-    if(error) showStatus(extractErrorMessage(error), 'error');
-  }
 </script>
 </body>
 </html>
