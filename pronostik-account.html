@@ -379,7 +379,16 @@
       return;
     }
 
-    await sb.auth.signOut();
+    try {
+      await sb.auth.signOut();
+    } catch(e){
+      console.error('signOut after delete failed (continuing anyway):', e);
+    }
+    // Belt-and-suspenders: force-clear any leftover Supabase session data
+    // so a stale token can't conflict with a future sign-up using the same email.
+    Object.keys(localStorage).forEach(k => {
+      if(k.startsWith('sb-')) localStorage.removeItem(k);
+    });
     window.location.href = 'index.html';
   }
 
