@@ -6,11 +6,12 @@
 <title>Jere Tips — Panel Admin — BetCode</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
     --gold:#E8B34C; --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
-    --win:#4CAF7D;
+    --win:#4CAF7D; --red:#E8574C;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
@@ -27,16 +28,12 @@
   .head-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
   h1.title{font-size:26px;margin-bottom:4px;}
   .subtitle{font-size:13.5px;color:var(--text-muted);}
-  .btn-add{
-    background:var(--gold);color:#0A0A0A;border:none;padding:11px 18px;border-radius:8px;
-    font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;
-  }
+  .btn-add{background:var(--gold);color:#0A0A0A;border:none;padding:11px 18px;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
 
   .filters{display:flex;gap:8px;margin-bottom:22px;}
   .chip{padding:8px 16px;border-radius:20px;border:1px solid var(--border);font-size:13px;color:var(--text-muted);cursor:pointer;}
   .chip.active{background:var(--gold);border-color:var(--gold);color:#0A0A0A;font-weight:600;}
 
-  /* Add form */
   .add-form{background:var(--bg-card);border:1px solid var(--gold);border-radius:12px;padding:20px 22px;margin-bottom:24px;}
   .form-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);letter-spacing:0.06em;margin-bottom:14px;}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
@@ -47,17 +44,13 @@
   }
   .field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
   .full{grid-column:1 / -1;}
-  .btn-publish{
-    background:var(--gold);color:#0A0A0A;border:none;padding:10px 20px;border-radius:7px;
-    font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;
-  }
+  .form-actions{display:flex;gap:8px;margin-top:6px;}
+  .btn-publish{background:var(--gold);color:#0A0A0A;border:none;padding:10px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;}
+  .btn-cancel-edit{background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:none;}
 
   .section-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);letter-spacing:0.06em;margin-bottom:12px;}
 
-  .tip-row{
-    display:flex;justify-content:space-between;align-items:center;gap:14px;
-    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;
-  }
+  .tip-row{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;}
   .tip-main{min-width:0;flex:1;}
   .tip-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
   .status-badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:5px;font-weight:700;}
@@ -72,94 +65,217 @@
   .btn-mini.publish{background:var(--win);color:#06170F;}
   .btn-mini.edit{background:transparent;border:1px solid var(--border);color:var(--text);}
   .btn-mini.del{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .empty-note{text-align:center;color:var(--text-muted);font-size:13px;padding:30px 0;}
+  .not-admin{text-align:center;padding:80px 20px;color:var(--text-muted);}
 </style>
 </head>
 <body>
   <div class="wrap">
     <nav>
-      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <a class="logo" href="index.html"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></a>
       <span class="admin-tag">MÒD ADMIN</span>
     </nav>
 
-    <div class="head-row">
-      <div>
-        <h1 class="title">Jere Tips</h1>
-        <div class="subtitle">Revize tips AI jenere yo, oswa ajoute pa w manyèlman.</div>
+    <div id="notAdminBlock" class="not-admin" style="display:none;">
+      Ou pa gen aksè admin sou paj sa a. <a href="pronostik-dashboard.html" style="color:var(--gold);">← Retounen nan dashboard</a>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+      <div class="head-row">
+        <div>
+          <h1 class="title">Jere Tips</h1>
+          <div class="subtitle">Ajoute, modifye, oswa pibliye tips manyèlman.</div>
+        </div>
+        <div class="btn-add" onclick="document.getElementById('addForm').scrollIntoView({behavior:'smooth'})">+ Ajoute Tip</div>
       </div>
-      <div class="btn-add" onclick="document.getElementById('addForm').scrollIntoView({behavior:'smooth'})">+ Ajoute Tip Manyèl</div>
-    </div>
 
-    <div class="filters">
-      <div class="chip active">Tout</div>
-      <div class="chip">Annatant Revizyon</div>
-      <div class="chip">Pibliye</div>
-    </div>
+      <div class="filters">
+        <div class="chip active" data-status="all">Tout</div>
+        <div class="chip" data-status="draft">Annatant Revizyon</div>
+        <div class="chip" data-status="published">Pibliye</div>
+      </div>
 
-    <div class="add-form" id="addForm">
-      <div class="form-title">// AJOUTE YON TIP MANYÈL</div>
-      <div class="form-grid">
-        <div class="field"><label>LIG</label><input type="text" placeholder="Pa egzanp: Ligue 1"></div>
-        <div class="field"><label>DAT/È MATCH</label><input type="text" placeholder="Dimanch 15:00"></div>
-        <div class="field full"><label>MATCH</label><input type="text" placeholder="Ekip A — Ekip B"></div>
-        <div class="field"><label>TIP/PICK</label><input type="text" placeholder="Pa egzanp: Plis 2.5 Gòl"></div>
-        <div class="field"><label>NIVO KONFYANS (%)</label><input type="text" placeholder="82"></div>
-        <div class="field full"><label>NIVO AKSÈ</label>
-          <select><option>Gratis</option><option>Pro</option><option>VIP</option></select>
+      <div class="add-form" id="addForm">
+        <div class="form-title" id="formTitle">// AJOUTE YON TIP</div>
+        <div class="form-grid">
+          <div class="field"><label>LIG</label><input type="text" id="fLeague" placeholder="Pa egzanp: Ligue 1"></div>
+          <div class="field"><label>DAT MATCH</label><input type="date" id="fDate"></div>
+          <div class="field"><label>È KOUP</label><input type="text" id="fTime" placeholder="15:00"></div>
+          <div class="field full"><label>MATCH</label><input type="text" id="fMatch" placeholder="Ekip A — Ekip B"></div>
+          <div class="field"><label>MACHE (MARKET)</label><input type="text" id="fMarket" placeholder="Pa egzanp: Total Gòl"></div>
+          <div class="field"><label>TIP/PICK</label><input type="text" id="fPick" placeholder="Pa egzanp: Plis 2.5"></div>
+          <div class="field"><label>NIVO KONFYANS (%)</label><input type="number" id="fConf" min="0" max="100" placeholder="82"></div>
+          <div class="field"><label>NIVO AKSÈ</label>
+            <select id="fAccess"><option value="gratis">Gratis</option><option value="pro">Pro</option><option value="vip">VIP</option></select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-publish" id="submitTipBtn" onclick="submitTip()">Pibliye Tip la</button>
+          <button class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">Anile Modifikasyon</button>
         </div>
       </div>
-      <button class="btn-publish">Pibliye Tip la</button>
+
+      <div class="section-title" id="listTitle">// TIPS</div>
+      <div id="tipsAdminList"></div>
     </div>
-
-    <div class="section-title">// 6 TIPS — JODIA</div>
-
-    <div class="tip-row">
-      <div class="tip-main">
-        <div class="tip-top"><span class="status-badge published">PIBLIYE</span><span class="status-badge source">AI</span></div>
-        <div class="tip-match">Olympique Cité — AS Portuaire</div>
-        <div class="tip-pick">Total Gòl — <b>Plis 2.5</b> (82%)</div>
-      </div>
-      <div class="tip-actions">
-        <div class="btn-mini edit">Modifye</div>
-        <div class="btn-mini del">Efase</div>
-      </div>
-    </div>
-
-    <div class="tip-row">
-      <div class="tip-main">
-        <div class="tip-top"><span class="status-badge review">ANNATANT</span><span class="status-badge source">AI</span></div>
-        <div class="tip-match">Deportivo Sur — Real Norte</div>
-        <div class="tip-pick">Total Gòl — <b>Plis 3.5</b> (91%)</div>
-      </div>
-      <div class="tip-actions">
-        <div class="btn-mini publish">Pibliye</div>
-        <div class="btn-mini edit">Modifye</div>
-      </div>
-    </div>
-
-    <div class="tip-row">
-      <div class="tip-main">
-        <div class="tip-top"><span class="status-badge review">ANNATANT</span><span class="status-badge source">AI</span></div>
-        <div class="tip-match">Racing FC — Atlas SC</div>
-        <div class="tip-pick">Miltip 3 Match — <b>Gwo Kòt</b> (85%)</div>
-      </div>
-      <div class="tip-actions">
-        <div class="btn-mini publish">Pibliye</div>
-        <div class="btn-mini edit">Modifye</div>
-      </div>
-    </div>
-
-    <div class="tip-row">
-      <div class="tip-main">
-        <div class="tip-top"><span class="status-badge published">PIBLIYE</span><span class="status-badge source">Manyèl</span></div>
-        <div class="tip-match">Milano United — Vitesse Roma</div>
-        <div class="tip-pick">Rezilta Double Chans — <b>1X</b> (74%)</div>
-      </div>
-      <div class="tip-actions">
-        <div class="btn-mini edit">Modifye</div>
-        <div class="btn-mini del">Efase</div>
-      </div>
-    </div>
-
   </div>
+
+<script>
+  const SUPABASE_URL = 'https://ennivlexjektcwfshozl.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_jQWO3I8vDsUJshVYrWbRLg_Zn3Zafjz';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let allTips = [];
+  let editingId = null;
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  async function checkAdminAndLoad(){
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){
+      window.location.href = 'pronostik-auth.html';
+      return;
+    }
+    const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', session.user.id).single();
+    if(!profile?.is_admin){
+      document.getElementById('notAdminBlock').style.display = 'block';
+      return;
+    }
+    document.getElementById('adminContent').style.display = 'block';
+    document.getElementById('fDate').valueAsDate = new Date();
+    loadTips();
+  }
+
+  async function loadTips(){
+    const { data, error } = await sb.from('tips').select('*').order('created_at', { ascending: false });
+    if(error){ console.error(error); return; }
+    allTips = data || [];
+    renderList();
+  }
+
+  function renderList(){
+    const activeStatus = document.querySelector('.filters .chip.active').getAttribute('data-status');
+    const filtered = activeStatus === 'all' ? allTips : allTips.filter(t => t.status === activeStatus);
+    const list = document.getElementById('tipsAdminList');
+    document.getElementById('listTitle').textContent = '// ' + filtered.length + ' TIPS';
+
+    if(filtered.length === 0){
+      list.innerHTML = '<div class="empty-note">Pa gen tip pou montre isit la.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(t => {
+      const statusBadge = t.status === 'published'
+        ? '<span class="status-badge published">PIBLIYE</span>'
+        : '<span class="status-badge review">ANNATANT</span>';
+      const sourceBadge = `<span class="status-badge source">${t.source === 'ai' ? 'AI' : 'Manyèl'}</span>`;
+      const publishBtn = t.status !== 'published'
+        ? `<div class="btn-mini publish" onclick="publishTip('${t.id}')">Pibliye</div>` : '';
+      return `
+      <div class="tip-row">
+        <div class="tip-main">
+          <div class="tip-top">${statusBadge}${sourceBadge}</div>
+          <div class="tip-match">${escapeHtml(t.match_label)}</div>
+          <div class="tip-pick">${escapeHtml(t.market)} — <b>${escapeHtml(t.pick)}</b> (${t.confidence}% · ${t.access_level.toUpperCase()})</div>
+        </div>
+        <div class="tip-actions">
+          ${publishBtn}
+          <div class="btn-mini edit" onclick="editTip('${t.id}')">Modifye</div>
+          <div class="btn-mini del" onclick="deleteTip('${t.id}')">Efase</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.filters .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filters .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderList();
+    });
+  });
+
+  function clearForm(){
+    ['fLeague','fTime','fMatch','fMarket','fPick','fConf'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fDate').valueAsDate = new Date();
+    document.getElementById('fAccess').value = 'gratis';
+  }
+
+  async function submitTip(){
+    const payload = {
+      league: document.getElementById('fLeague').value.trim(),
+      match_date: document.getElementById('fDate').value,
+      kickoff_time: document.getElementById('fTime').value.trim(),
+      match_label: document.getElementById('fMatch').value.trim(),
+      market: document.getElementById('fMarket').value.trim(),
+      pick: document.getElementById('fPick').value.trim(),
+      confidence: parseInt(document.getElementById('fConf').value, 10) || 0,
+      access_level: document.getElementById('fAccess').value,
+      source: 'manual'
+    };
+
+    if(!payload.league || !payload.match_label || !payload.market || !payload.pick){
+      alert('Tanpri ranpli omwen Lig, Match, Mache, ak Pick.');
+      return;
+    }
+
+    if(editingId){
+      const { error } = await sb.from('tips').update(payload).eq('id', editingId);
+      if(error){ console.error(error); alert('Erè: pa t ka modifye tip la.'); return; }
+      cancelEdit();
+    } else {
+      payload.status = 'published';
+      const { error } = await sb.from('tips').insert(payload);
+      if(error){ console.error(error); alert('Erè: pa t ka kreye tip la.'); return; }
+      clearForm();
+    }
+    loadTips();
+  }
+
+  function editTip(id){
+    const t = allTips.find(x => x.id === id);
+    if(!t) return;
+    editingId = id;
+    document.getElementById('fLeague').value = t.league;
+    document.getElementById('fDate').value = t.match_date;
+    document.getElementById('fTime').value = t.kickoff_time || '';
+    document.getElementById('fMatch').value = t.match_label;
+    document.getElementById('fMarket').value = t.market;
+    document.getElementById('fPick').value = t.pick;
+    document.getElementById('fConf').value = t.confidence;
+    document.getElementById('fAccess').value = t.access_level;
+    document.getElementById('formTitle').textContent = '// MODIFYE TIP LA';
+    document.getElementById('submitTipBtn').textContent = 'Sove Modifikasyon';
+    document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    document.getElementById('addForm').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function cancelEdit(){
+    editingId = null;
+    clearForm();
+    document.getElementById('formTitle').textContent = '// AJOUTE YON TIP';
+    document.getElementById('submitTipBtn').textContent = 'Pibliye Tip la';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+  }
+
+  async function publishTip(id){
+    const { error } = await sb.from('tips').update({ status: 'published' }).eq('id', id);
+    if(error){ console.error(error); alert('Erè: pa t ka pibliye tip la.'); return; }
+    loadTips();
+  }
+
+  async function deleteTip(id){
+    if(!confirm('Efase tip sa a nèt?')) return;
+    const { error } = await sb.from('tips').delete().eq('id', id);
+    if(error){ console.error(error); alert('Erè: pa t ka efase tip la.'); return; }
+    loadTips();
+  }
+
+  checkAdminAndLoad();
+</script>
 </body>
 </html>

@@ -101,87 +101,29 @@
     <div class="filter-block">
       <div class="filter-label" data-i18n="filter_competition">// KONPETISYON</div>
       <div class="filters" id="leagueFilters">
-        <div class="chip active" data-i18n="chip_all">Tout</div>
-        <div class="chip">Ligue 1</div>
-        <div class="chip">Liga</div>
-        <div class="chip" data-i18n="league_champions">Lig dè Chanpyon</div>
-        <div class="chip">Serie A</div>
-        <div class="chip">Premier League</div>
+        <div class="chip active" data-league="all" data-i18n="chip_all">Tout</div>
+        <div class="chip" data-league="Ligue 1">Ligue 1</div>
+        <div class="chip" data-league="Liga">Liga</div>
+        <div class="chip" data-league="Lig dè Chanpyon" data-i18n="league_champions">Lig dè Chanpyon</div>
+        <div class="chip" data-league="Serie A">Serie A</div>
+        <div class="chip" data-league="Premier League">Premier League</div>
       </div>
     </div>
 
     <div class="filter-block">
       <div class="filter-label" data-i18n="filter_date">// DAT</div>
       <div class="filters" id="dateFilters">
-        <div class="chip active" data-i18n="chip_today">Jodia</div>
-        <div class="chip" data-i18n="chip_tomorrow">Demen</div>
-        <div class="chip" data-i18n="chip_after_tomorrow">Apre Demen</div>
-        <div class="chip" data-i18n="chip_in3">Nan 3 Jou</div>
-        <div class="chip" data-i18n="chip_in4">Nan 4 Jou</div>
-        <div class="chip" data-i18n="chip_in5">Nan 5 Jou</div>
+        <div class="chip active" data-offset="0" data-i18n="chip_today">Jodia</div>
+        <div class="chip" data-offset="1" data-i18n="chip_tomorrow">Demen</div>
+        <div class="chip" data-offset="2" data-i18n="chip_after_tomorrow">Apre Demen</div>
+        <div class="chip" data-offset="3" data-i18n="chip_in3">Nan 3 Jou</div>
+        <div class="chip" data-offset="4" data-i18n="chip_in4">Nan 4 Jou</div>
+        <div class="chip" data-offset="5" data-i18n="chip_in5">Nan 5 Jou</div>
       </div>
     </div>
 
-    <div class="tips-list">
-
-      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
-        <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">15:00</span></div>
-        <div class="tip-match">Olympique Cité — AS Portuaire</div>
-        <div class="tip-bottom">
-          <div class="tip-pick"><span data-i18n="market_goals">Total Gòl</span> — <b data-i18n="pick_over25">Plis 2.5</b></div>
-          <div class="conf-wrap"><div class="conf-bar"><span style="width:82%"></span></div><span class="conf-pct">82%</span></div>
-        </div>
-      </div>
-
-      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
-        <div class="tip-top"><span class="tip-league mono">SERIE A • JOUNEN 19</span><span class="tip-time mono">18:00</span></div>
-        <div class="tip-match">Milano United — Vitesse Roma</div>
-        <div class="tip-bottom">
-          <div class="tip-pick"><span data-i18n="market_double_chance">Rezilta Double Chans</span> — <b>1X</b></div>
-          <div class="conf-wrap"><div class="conf-bar"><span style="width:74%"></span></div><span class="conf-pct">74%</span></div>
-        </div>
-      </div>
-
-      <div class="tip-row locked">
-        <div class="lock-tag mono">VIP</div>
-        <div class="tip-top"><span class="tip-league mono">LIGA • JOUNEN 21</span><span class="tip-time mono">20:30</span></div>
-        <div class="tip-match">Deportivo Sur — Real Norte</div>
-        <div class="tip-bottom">
-          <div class="tip-pick"><span data-i18n="market_goals">Total Gòl</span> — <b data-i18n="pick_over35">Plis 3.5</b></div>
-          <div class="conf-wrap"><div class="conf-bar"><span style="width:91%"></span></div><span class="conf-pct">91%</span></div>
-        </div>
-        <div class="lock-overlay">🔒 <a href="pronostik-checkout.html" data-i18n="unlock_vip">Vin VIP pou dekloke</a></div>
-      </div>
-
-      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
-        <div class="tip-top"><span class="tip-league mono">PREMIER LEAGUE • JOUNEN 20</span><span class="tip-time mono">17:30</span></div>
-        <div class="tip-match">Nordik City — Sport Baie</div>
-        <div class="tip-bottom">
-          <div class="tip-pick"><span data-i18n="market_btts">Toude Ekip Make</span> — <b data-i18n="pick_yes">Wi</b></div>
-          <div class="conf-wrap"><div class="conf-bar"><span style="width:79%"></span></div><span class="conf-pct">79%</span></div>
-        </div>
-      </div>
-
-      <div class="tip-row" onclick="window.location.href='pronostik-tip-detail.html'">
-        <div class="tip-top"><span class="tip-league mono">LIG DÈ CHANPYON • JOUNEN 5</span><span class="tip-time mono">16:00</span></div>
-        <div class="tip-match">Nord Athletic — Étoile Bleue</div>
-        <div class="tip-bottom">
-          <div class="tip-pick"><span data-i18n="market_corners">Total Kòne</span> — <b data-i18n="pick_over95">Plis 9.5</b></div>
-          <div class="conf-wrap"><div class="conf-bar"><span style="width:70%"></span></div><span class="conf-pct">70%</span></div>
-        </div>
-      </div>
-
-      <div class="tip-row locked">
-        <div class="lock-tag mono">VIP</div>
-        <div class="tip-top"><span class="tip-league mono">LIGUE 1 • JOUNEN 22</span><span class="tip-time mono">21:00</span></div>
-        <div class="tip-match">Racing FC — Atlas SC</div>
-        <div class="tip-bottom">
-          <div class="tip-pick"><span data-i18n="market_multi">Miltip 3 Match</span> — <b data-i18n="pick_bigodds">Gwo Kòt</b></div>
-          <div class="conf-wrap"><div class="conf-bar"><span style="width:85%"></span></div><span class="conf-pct">85%</span></div>
-        </div>
-        <div class="lock-overlay">🔒 <a href="pronostik-checkout.html" data-i18n="unlock_vip">Vin VIP pou dekloke</a></div>
-      </div>
-
+    <div class="tips-list" id="tipsList">
+      <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:30px 0;" id="tipsLoading">Chajman tips...</div>
     </div>
 
     <div class="load-more" id="loadMoreBtn" data-i18n="load_more">Chaje Rès Match Jounen an</div>
@@ -248,12 +190,84 @@
     return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
   }
 
+  let currentPlanRank = 0;
+  let allTips = [];
+  const PLAN_RANK = { gratis: 0, pro: 1, vip: 2 };
+
   async function populateDashboard(session){
     const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
     const name = profile?.full_name || session.user.user_metadata?.full_name || '';
     document.getElementById('avatarInitials').textContent = initials(name);
     currentPlanKey = profile?.plan || 'gratis';
+    currentPlanRank = PLAN_RANK[currentPlanKey] ?? 0;
     applyTranslations();
+    loadTips();
+  }
+
+  async function loadTips(){
+    const { data, error } = await sb
+      .from('tips')
+      .select('*')
+      .eq('status', 'published')
+      .order('match_date', { ascending: true })
+      .order('kickoff_time', { ascending: true });
+
+    if(error){
+      console.error('Load tips error:', error);
+      document.getElementById('tipsList').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:30px 0;">Nou pa t ka chaje tips yo.</div>';
+      return;
+    }
+    allTips = data || [];
+    renderTips();
+  }
+
+  function renderTips(){
+    const activeLeague = document.querySelector('#leagueFilters .chip.active')?.getAttribute('data-league') || 'all';
+    const activeOffset = document.querySelector('#dateFilters .chip.active')?.getAttribute('data-offset') || '0';
+
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + parseInt(activeOffset, 10));
+    const targetDateStr = targetDate.toISOString().slice(0, 10);
+
+    const filtered = allTips.filter(t => {
+      const leagueMatch = activeLeague === 'all' || t.league === activeLeague;
+      const dateMatch = t.match_date === targetDateStr;
+      return leagueMatch && dateMatch;
+    });
+
+    const list = document.getElementById('tipsList');
+    if(filtered.length === 0){
+      list.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:30px 0;">Pa gen tips pou seleksyon sa a.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(t => {
+      const tipRank = PLAN_RANK[t.access_level] ?? 0;
+      const locked = tipRank > currentPlanRank;
+      const rowClass = locked ? 'tip-row locked' : 'tip-row';
+      const clickAttr = locked ? '' : `onclick="window.location.href='pronostik-tip-detail.html'"`;
+      const lockTag = locked ? `<div class="lock-tag mono">${t.access_level.toUpperCase()}</div>` : '';
+      const lockOverlay = locked
+        ? `<div class="lock-overlay">🔒 <a href="pronostik-checkout.html">Vin ${t.access_level.toUpperCase()} pou dekloke</a></div>`
+        : '';
+      return `
+      <div class="${rowClass}" ${clickAttr}>
+        ${lockTag}
+        <div class="tip-top"><span class="tip-league mono">${escapeHtml(t.league)}</span><span class="tip-time mono">${escapeHtml(t.kickoff_time || '')}</span></div>
+        <div class="tip-match">${escapeHtml(t.match_label)}</div>
+        <div class="tip-bottom">
+          <div class="tip-pick">${escapeHtml(t.market)} — <b>${escapeHtml(t.pick)}</b></div>
+          <div class="conf-wrap"><div class="conf-bar"><span style="width:${t.confidence}%"></span></div><span class="conf-pct">${t.confidence}%</span></div>
+        </div>
+        ${lockOverlay}
+      </div>`;
+    }).join('');
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
   }
 
   async function loadUser(){
@@ -288,14 +302,13 @@
       chip.addEventListener('click', () => {
         group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
+        renderTips();
       });
     });
   });
 
   document.getElementById('loadMoreBtn').addEventListener('click', function(){
-    loadMoreExhausted = true;
-    applyTranslations();
-    this.style.cursor = 'default';
+    loadTips();
   });
 
   applyTranslations();
