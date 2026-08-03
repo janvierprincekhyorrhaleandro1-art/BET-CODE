@@ -6,11 +6,11 @@
 <title>Analiz Match — BetCode</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#000000; --bg-elevated:#0D0D0D; --bg-card:#131313;
-    --gold:#E8B34C; --gold-bright:#F4C766;
-    --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
+    --gold:#E8B34C; --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55); --border:rgba(255,255,255,0.08);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
@@ -24,127 +24,168 @@
   .logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 12px var(--gold);}
   .back{font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
 
-  /* Match header */
-  .match-header{
-    background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
-    padding:26px;margin-bottom:20px;
-  }
+  .loading-state{text-align:center;padding:60px 0;color:var(--text-muted);font-size:14px;}
+  #pageContent{display:none;}
+
+  .match-header{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:26px;margin-bottom:20px;}
   .league-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);margin-bottom:20px;}
   .teams{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:24px;}
   .team{text-align:center;flex:1;}
   .team .badge{
     width:56px;height:56px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:'Bebas Neue',sans-serif;font-size:18px;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:'Bebas Neue',sans-serif;font-size:16px;
   }
   .team .name{font-size:13.5px;font-weight:500;}
   .vs{font-family:'JetBrains Mono',monospace;color:var(--text-muted);font-size:13px;}
 
-  .verdict{
-    background:var(--bg-elevated);border-radius:10px;padding:20px;
-    display:flex;align-items:center;gap:20px;
-  }
+  .verdict{background:var(--bg-elevated);border-radius:10px;padding:20px;display:flex;align-items:center;gap:20px;}
   .gauge{position:relative;width:84px;height:84px;flex-shrink:0;}
   .gauge svg{transform:rotate(-90deg);}
   .gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;color:var(--gold);}
   .verdict-text .label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:4px;}
-  .verdict-text .pick{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:0.01em;}
+  .verdict-text .pick{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:0.01em;}
 
-  /* Market predictions */
-  .section-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);letter-spacing:0.06em;margin:28px 0 14px;}
-  .market-row{
-    display:flex;justify-content:space-between;align-items:center;gap:16px;
-    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
-    padding:14px 18px;margin-bottom:8px;
-  }
-  .market-name{font-size:14px;font-weight:600;margin-bottom:6px;}
-  .market-pick{font-size:12.5px;color:var(--gold);}
-  .market-conf{display:flex;align-items:center;gap:8px;min-width:110px;flex-shrink:0;}
-  .market-bar{flex:1;height:5px;background:var(--bg-elevated);border-radius:3px;overflow:hidden;}
-  .market-bar span{display:block;height:100%;background:var(--gold);border-radius:3px;}
-  .market-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);}
+  .section-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);letter-spacing:0.06em;margin:28px 0 14px;display:flex;align-items:center;gap:8px;}
 
-  .disclaimer{
-    background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;
-    padding:14px 16px;font-size:12px;color:var(--text-muted);margin-top:28px;line-height:1.6;
-  }
+  .research-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .research-spinner{display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 0;color:var(--text-muted);font-size:13px;}
+  .spinner{width:30px;height:30px;border:3px solid var(--bg-elevated);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .research-body{font-size:13.5px;color:var(--text-muted);line-height:1.75;white-space:pre-wrap;}
+  .research-note{font-size:11px;color:var(--text-muted);margin-top:14px;font-style:italic;}
+
+  .disclaimer{background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--text-muted);margin-top:28px;line-height:1.6;}
   .disclaimer b{color:var(--text);}
 </style>
 </head>
 <body>
   <div class="wrap">
     <nav>
-      <div class="logo"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></div>
+      <a class="logo" href="index.html"><span class="dot"></span>BET<span style="color:var(--gold)">CODE</span></a>
       <a class="back" href="pronostik-dashboard.html">← Retounen nan Dashboard</a>
     </nav>
 
-    <div class="match-header">
-      <div class="league-row"><span>LIGUE 1 • JOUNEN 22</span><span class="mono">Dimanch 15:00</span></div>
-      <div class="teams">
-        <div class="team"><div class="badge">OC</div><div class="name">Olympique Cité</div></div>
-        <div class="vs">VS</div>
-        <div class="team"><div class="badge">ASP</div><div class="name">AS Portuaire</div></div>
-      </div>
-      <div class="verdict">
-        <div class="gauge">
-          <svg width="84" height="84">
-            <circle cx="42" cy="42" r="36" stroke="#262626" stroke-width="7" fill="none"/>
-            <circle cx="42" cy="42" r="36" stroke="#E8B34C" stroke-width="7" fill="none"
-              stroke-dasharray="226" stroke-dashoffset="41" stroke-linecap="round"/>
-          </svg>
-          <div class="gauge-val">82%</div>
+    <div class="loading-state" id="loadingState">Chajman tip la...</div>
+
+    <div id="pageContent">
+      <div class="match-header">
+        <div class="league-row"><span id="matchLeague">—</span><span class="mono" id="matchDateTime">—</span></div>
+        <div class="teams">
+          <div class="team"><div class="badge" id="homeBadge">--</div><div class="name" id="homeName">—</div></div>
+          <div class="vs">VS</div>
+          <div class="team"><div class="badge" id="awayBadge">--</div><div class="name" id="awayName">—</div></div>
         </div>
-        <div class="verdict-text">
-          <div class="label">TIP PRENSIPAL</div>
-          <div class="pick">Total Gòl — Plis 2.5</div>
+        <div class="verdict">
+          <div class="gauge">
+            <svg width="84" height="84">
+              <circle cx="42" cy="42" r="36" stroke="#262626" stroke-width="7" fill="none"/>
+              <circle cx="42" cy="42" r="36" stroke="#E8B34C" stroke-width="7" fill="none"
+                stroke-dasharray="226" stroke-dashoffset="226" stroke-linecap="round" id="gaugeCircle"/>
+            </svg>
+            <div class="gauge-val" id="gaugeVal">—</div>
+          </div>
+          <div class="verdict-text">
+            <div class="label">TIP PRENSIPAL</div>
+            <div class="pick" id="mainPick">—</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="section-title">// TOUT TIPS POU MATCH SA A</div>
-
-    <div class="market-row">
-      <div>
-        <div class="market-name">Total Gòl</div>
-        <div class="market-pick">Plis 2.5</div>
+      <div class="section-title">// ANALIZ DETAYE</div>
+      <div class="research-box" id="researchBox">
+        <div class="research-spinner">
+          <div class="spinner"></div>
+          <div>Ap chèche enfòmasyon detaye sou match sa a...</div>
+        </div>
       </div>
-      <div class="market-conf"><div class="market-bar"><span style="width:82%"></span></div><span class="market-pct">82%</span></div>
-    </div>
 
-    <div class="market-row">
-      <div>
-        <div class="market-name">Rezilta Final</div>
-        <div class="market-pick">Double Chans 1X</div>
+      <div class="disclaimer">
+        <b>⚠ Sonje:</b> Analiz sa a baze sou done ak estatistik — li pa yon garanti. Jwe ak responsablite, epi pa janm mize plis pase sa w ka pèdi.
       </div>
-      <div class="market-conf"><div class="market-bar"><span style="width:68%"></span></div><span class="market-pct">68%</span></div>
-    </div>
-
-    <div class="market-row">
-      <div>
-        <div class="market-name">Toude Ekip Make (BTTS)</div>
-        <div class="market-pick">Wi</div>
-      </div>
-      <div class="market-conf"><div class="market-bar"><span style="width:79%"></span></div><span class="market-pct">79%</span></div>
-    </div>
-
-    <div class="market-row">
-      <div>
-        <div class="market-name">Total Kat Jòn</div>
-        <div class="market-pick">Plis 4.5</div>
-      </div>
-      <div class="market-conf"><div class="market-bar"><span style="width:71%"></span></div><span class="market-pct">71%</span></div>
-    </div>
-
-    <div class="market-row">
-      <div>
-        <div class="market-name">Total Kòne</div>
-        <div class="market-pick">Plis 9.5</div>
-      </div>
-      <div class="market-conf"><div class="market-bar"><span style="width:76%"></span></div><span class="market-pct">76%</span></div>
-    </div>
-
-    <div class="disclaimer">
-      <b>⚠ Sonje:</b> Analiz sa a baze sou done ak estatistik — li pa yon garanti. Jwe ak responsablite, epi pa janm mize plis pase sa w ka pèdi.
     </div>
   </div>
+
+<script>
+  const SUPABASE_URL = 'https://ennivlexjektcwfshozl.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_jQWO3I8vDsUJshVYrWbRLg_Zn3Zafjz';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function initials(name){
+    const parts = (name || '').trim().split(' ').filter(Boolean);
+    return (parts[0]?.[0] || '').toUpperCase() + (parts[parts.length-1]?.[0] || '').toUpperCase();
+  }
+
+  async function loadTip(){
+    const params = new URLSearchParams(window.location.search);
+    const tipId = params.get('id');
+
+    if(!tipId){
+      document.getElementById('loadingState').textContent = 'Pa gen tip presize. Retounen nan dashboard la.';
+      return;
+    }
+
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){
+      window.location.href = 'pronostik-auth.html';
+      return;
+    }
+
+    const { data: tip, error } = await sb.from('tips').select('*').eq('id', tipId).single();
+    if(error || !tip){
+      document.getElementById('loadingState').textContent = 'Nou pa jwenn tip sa a.';
+      return;
+    }
+
+    const parts = tip.match_label.split('—').map(s => s.trim());
+    const homeTeam = parts[0] || tip.match_label;
+    const awayTeam = parts[1] || '';
+
+    document.getElementById('matchLeague').textContent = `${tip.league.toUpperCase()}`;
+    const dateStr = tip.match_date ? new Date(tip.match_date + 'T00:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'long' }) : '';
+    document.getElementById('matchDateTime').textContent = `${dateStr} • ${tip.kickoff_time || ''}`;
+    document.getElementById('homeName').textContent = homeTeam;
+    document.getElementById('awayName').textContent = awayTeam;
+    document.getElementById('homeBadge').textContent = initials(homeTeam);
+    document.getElementById('awayBadge').textContent = initials(awayTeam);
+    document.getElementById('mainPick').textContent = `${tip.market} — ${tip.pick}`;
+    document.getElementById('gaugeVal').textContent = tip.confidence + '%';
+
+    const circumference = 226;
+    const circle = document.getElementById('gaugeCircle');
+    setTimeout(() => {
+      circle.style.transition = 'stroke-dashoffset 1s ease-out';
+      circle.style.strokeDashoffset = circumference - (circumference * (tip.confidence / 100));
+    }, 200);
+
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('pageContent').style.display = 'block';
+
+    loadResearch(homeTeam, awayTeam);
+  }
+
+  async function loadResearch(homeTeam, awayTeam){
+    try {
+      const res = await fetch('/api/analyze-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ homeTeam, awayTeam })
+      });
+      const data = await res.json();
+      const box = document.getElementById('researchBox');
+      if(!res.ok){
+        box.innerHTML = `<div class="research-body">Nou pa t ka chaje analiz detaye a kounye a.</div>`;
+        return;
+      }
+      const safeText = (data.analysis || '').replace(/</g, '&lt;');
+      box.innerHTML = `<div class="research-body">${safeText}</div>` +
+        (data.cached ? '<div class="research-note">Rechèch sa a te fèt pi bonè jodia.</div>' : '');
+    } catch(err){
+      console.error('Research error:', err);
+      document.getElementById('researchBox').innerHTML = `<div class="research-body">Nou pa t ka konekte ak sèvis rechèch la.</div>`;
+    }
+  }
+
+  loadTip();
+</script>
 </body>
 </html>
