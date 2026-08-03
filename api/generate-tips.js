@@ -1,10 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
 
-const COMPETITIONS = {
-  PL: 'Premier League', PD: 'Liga', BL1: 'Bundesliga',
-  SA: 'Serie A', FL1: 'Ligue 1', CL: 'Champions League'
-};
+ const league = m.competition?.name || 'Lòt';
 const MAX_PER_RUN = 15; // limit tip generation per run so it stays fast
 
 export default async function handler(req, res) {
