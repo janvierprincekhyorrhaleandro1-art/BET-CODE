@@ -1,0 +1,8 @@
+{
+  "name": "betcode",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "^2.15.0"
+  }
+}
