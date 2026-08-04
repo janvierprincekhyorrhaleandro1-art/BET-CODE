@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 const MAX_PER_RUN = 15; // limit tip generation per run so it stays fast
 
 export default async function handler(req, res) {
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (req.query.secret !== process.env.CRON_SECRET) {
   return res.status(401).json({ error: 'Unauthorized' });
   }
 
