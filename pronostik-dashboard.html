@@ -79,6 +79,34 @@
 
   .load-more{display:block;width:100%;padding:13px 0;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:14px;text-align:center;cursor:pointer;}
   .load-more:hover{border-color:var(--gold);color:var(--text);}
+
+  .research-btn{
+    display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-muted);
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:5px 10px;
+    cursor:pointer;margin-top:10px;
+  }
+  .research-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+    max-width:440px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative;
+  }
+  .modal-close{position:absolute;top:14px;right:16px;color:var(--text-muted);cursor:pointer;font-size:18px;}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:19px;margin-bottom:16px;padding-right:24px;}
+  .modal-spinner{
+    display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 0;color:var(--text-muted);font-size:13px;
+  }
+  .spinner{
+    width:32px;height:32px;border:3px solid var(--bg-elevated);border-top-color:var(--gold);
+    border-radius:50%;animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .modal-body{font-size:13.5px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;}
 </style>
 </head>
 <body>
@@ -102,11 +130,6 @@
       <div class="filter-label" data-i18n="filter_competition">// KONPETISYON</div>
       <div class="filters" id="leagueFilters">
         <div class="chip active" data-league="all" data-i18n="chip_all">Tout</div>
-        <div class="chip" data-league="Ligue 1">Ligue 1</div>
-        <div class="chip" data-league="Liga">Liga</div>
-        <div class="chip" data-league="Lig dè Chanpyon" data-i18n="league_champions">Lig dè Chanpyon</div>
-        <div class="chip" data-league="Serie A">Serie A</div>
-        <div class="chip" data-league="Premier League">Premier League</div>
       </div>
     </div>
 
@@ -218,7 +241,27 @@
       return;
     }
     allTips = data || [];
+    populateLeagueChips();
     renderTips();
+  }
+
+  function populateLeagueChips(){
+    const group = document.getElementById('leagueFilters');
+    const leagues = [...new Set(allTips.map(t => t.league))].sort();
+    // Keep the "Tout" chip, append one chip per distinct league actually present
+    group.querySelectorAll('.chip:not([data-league="all"])').forEach(el => el.remove());
+    leagues.forEach(league => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.setAttribute('data-league', league);
+      chip.textContent = league;
+      chip.addEventListener('click', () => {
+        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderTips();
+      });
+      group.appendChild(chip);
+    });
   }
 
   function renderTips(){
@@ -245,11 +288,12 @@
       const tipRank = PLAN_RANK[t.access_level] ?? 0;
       const locked = tipRank > currentPlanRank;
       const rowClass = locked ? 'tip-row locked' : 'tip-row';
-      const clickAttr = locked ? '' : `onclick="window.location.href='pronostik-tip-detail.html'"`;
+      const clickAttr = locked ? '' : `onclick="window.location.href='pronostik-tip-detail.html?id=${t.id}'"`;
       const lockTag = locked ? `<div class="lock-tag mono">${t.access_level.toUpperCase()}</div>` : '';
       const lockOverlay = locked
         ? `<div class="lock-overlay">🔒 <a href="pronostik-checkout.html">Vin ${t.access_level.toUpperCase()} pou dekloke</a></div>`
         : '';
+      const researchBtn = locked ? '' : `<div class="research-btn" onclick="event.stopPropagation(); openResearch('${escapeHtml(t.match_label)}')">🔍 Rechèch Live</div>`;
       return `
       <div class="${rowClass}" ${clickAttr}>
         ${lockTag}
@@ -259,6 +303,7 @@
           <div class="tip-pick">${escapeHtml(t.market)} — <b>${escapeHtml(t.pick)}</b></div>
           <div class="conf-wrap"><div class="conf-bar"><span style="width:${t.confidence}%"></span></div><span class="conf-pct">${t.confidence}%</span></div>
         </div>
+        ${researchBtn}
         ${lockOverlay}
       </div>`;
     }).join('');
@@ -311,8 +356,56 @@
     loadTips();
   });
 
+  async function openResearch(matchLabel){
+    document.getElementById('modalTitle').textContent = matchLabel;
+    document.getElementById('modalContent').innerHTML = `
+      <div class="modal-spinner">
+        <div class="spinner"></div>
+        <div>Ap chèche enfòmasyon yo...</div>
+      </div>`;
+    document.getElementById('researchModal').classList.add('show');
+
+    const parts = matchLabel.split('—').map(s => s.trim());
+    const homeTeam = parts[0] || matchLabel;
+    const awayTeam = parts[1] || '';
+
+    try {
+      const res = await fetch('/api/analyze-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ homeTeam, awayTeam })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        document.getElementById('modalContent').innerHTML = `<div class="modal-body">Erè: ${data.error || 'Nou pa t ka fè rechèch la.'}</div>`;
+        return;
+      }
+      document.getElementById('modalContent').innerHTML = `<div class="modal-body">${(data.analysis || '').replace(/</g,'&lt;')}</div>`;
+    } catch(err){
+      console.error('Research fetch error:', err);
+      document.getElementById('modalContent').innerHTML = `<div class="modal-body">Nou pa t ka konekte ak sèvis rechèch la.</div>`;
+    }
+  }
+
+  function closeResearch(){
+    document.getElementById('researchModal').classList.remove('show');
+  }
+
   applyTranslations();
   loadUser();
 </script>
+
+  <div class="modal-overlay" id="researchModal">
+    <div class="modal-box">
+      <span class="modal-close" onclick="closeResearch()">✕</span>
+      <div class="modal-title" id="modalTitle">Rechèch Live</div>
+      <div id="modalContent">
+        <div class="modal-spinner">
+          <div class="spinner"></div>
+          <div>Ap chèche enfòmasyon yo...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
